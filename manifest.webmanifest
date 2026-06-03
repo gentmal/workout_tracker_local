@@ -1,0 +1,16 @@
+{
+  "name": "OVERLOAD — Workout Tracker",
+  "short_name": "OVERLOAD",
+  "description": "Personal strength training tracker with custom programs, charts, rest timer and body tracking.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0b0a",
+  "theme_color": "#0a0b0a",
+  "icons": [
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
