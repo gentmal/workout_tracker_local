@@ -467,65 +467,93 @@ canvas.chart { display: block; width: 100%; height: auto; touch-action: none; }
    SETTINGS · SHEET · CHARTS · INIT
    ══════════════════════════════════════════════════════════════ */
 
-/* ─────────── DEFAULT PROGRAM (ids preserved from v3) ─────────── */
+/* ─────────── DEFAULT PROGRAM ─────────── */
 const DEFAULT_PROGRAM = {
-  id: 'ppl', name: 'Push / Pull / Legs',
+  id: 'fbabc', name: 'Full Body A / B / C',
   days: [
-    { id:'push', name:'Push', type:'push', sub:'Chest · Shoulders · Triceps',
-      warmup:'<strong>Warm-up (5–7 min):</strong> 5 min incline walk · 10 arm circles each direction · 10 band pull-aparts × 2 sets',
+    { id:'fba', name:'Workout A', type:'full', sub:'Chest · Back · Quads · Delts · Triceps · Abs',
+      warmup:'<strong>Warm-up (5–7 min):</strong> 5 min incline walk or bike · Band pull-aparts ×15 · Dead bug ×8/side · Glute bridge ×12',
       ex:[
-        {id:'mcp', name:'Machine Chest Press', muscle:'Chest', sets:3, reps:'10–12', rest:90, why:'Fixed path removes stability demand. Primary chest stimulus. Safe shoulder loading.'},
-        {id:'clr', name:'Cable Lateral Raise (one arm)', muscle:'Shoulders', sets:3, reps:'12–15', rest:60, why:'Constant cable tension builds lateral delt width.'},
-        {id:'msp', name:'Machine Shoulder Press', muscle:'Shoulders', sets:3, reps:'10–12', rest:90, why:'Overhead pressing for shoulder mass.'},
-        {id:'ctp', name:'Cable Tricep Pushdown (rope)', muscle:'Triceps', sets:3, reps:'12–15', rest:60, why:'Triceps = 2/3 of arm mass. Direct isolation.'},
-        {id:'pd', name:'Pec Deck / Machine Fly', muscle:'Chest', sets:2, reps:'12–15', rest:60, why:'Stretch-biased chest isolation.'},
+        {id:'mcp', name:'Machine Chest Press', muscle:'Chest', sets:3, reps:'6–10', rest:120, why:'Primary horizontal press with high stability and low shoulder irritation.'},
+        {id:'csr', name:'Chest-Supported Row', muscle:'Back', sets:3, reps:'6–10', rest:120, why:'Heavy horizontal pull for upper-back thickness with low lower-back fatigue.'},
+        {id:'hsq', name:'Hack Squat', muscle:'Quads', sets:3, reps:'8–12', rest:120, why:'Stable squat pattern for quad growth with reduced balance demands.'},
+        {id:'clr', name:'Cable Lateral Raise (one arm)', muscle:'Shoulders', sets:3, reps:'12–20', rest:60, why:'Primary side delt hypertrophy with constant tension.'},
+        {id:'ctp', name:'Cable Tricep Pushdown (rope)', muscle:'Triceps', sets:2, reps:'10–15', rest:60, why:'Low-fatigue tricep isolation with easy progression.'},
+        {id:'cc', name:'Cable Crunch (or Machine)', muscle:'Core', sets:3, reps:'12–20', rest:60, why:'Direct ab work with consistent resistance.'},
       ]},
-    { id:'pull', name:'Pull', type:'pull', sub:'Back · Biceps · Rear Delts',
-      warmup:'<strong>Warm-up (5–7 min):</strong> 5 min incline walk · 2×10 light lat pulldown · 10 cat-cow stretches',
+    { id:'fbb', name:'Workout B', type:'full', sub:'Lats · Chest · Hamstrings · Rear Delts · Biceps · Calves', warmup:'',
       ex:[
-        {id:'scr', name:'Seated Cable Row (neutral)', muscle:'Back', sets:3, reps:'10–12', rest:90, why:'Horizontal pull for back thickness.'},
-        {id:'lpd', name:'Lat Pulldown (wide/neutral)', muscle:'Back', sets:3, reps:'10–12', rest:90, why:'Vertical pull for lat width — V-taper.'},
-        {id:'cfp', name:'Cable Facepull (rope, eye)', muscle:'Shoulders', sets:3, reps:'15', rest:60, why:'Rear delt and external rotator health.'},
-        {id:'mpc', name:'Machine Preacher Curl', muscle:'Biceps', sets:3, reps:'12–15', rest:60, why:'Bicep isolation, removes momentum.'},
-        {id:'sap', name:'Straight-Arm Cable Pulldown', muscle:'Back', sets:2, reps:'12–15', rest:60, why:'Isolates lats without bicep involvement.'},
+        {id:'lpd', name:'Lat Pulldown (neutral)', muscle:'Lats', sets:3, reps:'8–12', rest:90, why:''},
+        {id:'sip', name:'Low-Incline Smith Press', muscle:'Chest', sets:3, reps:'8–12', rest:90, why:''},
+        {id:'rdl', name:'Romanian Deadlift', muscle:'Hamstrings', sets:2, reps:'8–12', rest:120, why:''},
+        {id:'rpd', name:'Reverse Pec Deck', muscle:'Rear Delts', sets:3, reps:'12–20', rest:60, why:''},
+        {id:'dbc', name:'Dumbbell Curl', muscle:'Biceps', sets:3, reps:'10–15', rest:60, why:''},
+        {id:'scr3', name:'Standing Calf Raise', muscle:'Calves', sets:2, reps:'10–15', rest:60, why:''},
       ]},
-    { id:'legs', name:'Legs & Core', type:'legs', sub:'Knee-safe protocol',
-      warmup:'<strong>⚠ Extended warm-up (8–10 min — mandatory):</strong> 8 min low-resistance bike · 2×10 terminal knee extensions · 10 glute bridges.',
+    { id:'fbc', name:'Workout C', type:'full', sub:'Chest · Back · Legs · Delts · Arms', warmup:'',
       ex:[
-        {id:'lpr', name:'Leg Press (feet mid-plate)', muscle:'Quads', sets:3, reps:'10–12', rest:120, why:'Primary quad/glute stimulus, zero spinal load. No full lockout.'},
-        {id:'llc', name:'Lying Leg Curl', muscle:'Hamstrings', sets:3, reps:'10–12', rest:90, why:'Hamstring strength protects the patellar tendon.'},
-        {id:'hab', name:'Hip Abductor Machine (seated)', muscle:'Glutes', sets:3, reps:'15', rest:60, why:'Glute med prevents knee valgus.'},
-        {id:'scr2', name:'Seated Calf Raise', muscle:'Calves', sets:3, reps:'12–15', rest:60, why:'Soleus hypertrophy and Achilles conditioning.'},
-        {id:'cc', name:'Cable Crunch (or Machine)', muscle:'Core', sets:3, reps:'12–15', rest:60, why:'Direct ab work, constant tension, no neck strain.'},
-      ]},
-    { id:'opt', name:'Accessory', type:'opt', sub:'Shoulders & Arms — add week 5–6',
-      warmup:'<strong>Warm-up (5 min):</strong> 5 min incline walk · 10 arm circles. Targets shoulders and arms.',
-      ex:[
-        {id:'clrb', name:'Cable Lateral Raise (bilateral)', muscle:'Shoulders', sets:4, reps:'12–15', rest:60, why:'Second weekly shoulder stimulus.'},
-        {id:'idc', name:'Incline Dumbbell Curl', muscle:'Biceps', sets:3, reps:'12', rest:60, why:'Stretch-biased bicep work, long head.'},
-        {id:'oct', name:'Overhead Cable Tricep Ext.', muscle:'Triceps', sets:3, reps:'12', rest:60, why:'Long head of tricep in stretched position.'},
-        {id:'cfp2', name:'Cable Facepull', muscle:'Shoulders', sets:2, reps:'15', rest:60, why:'2× weekly shoulder health.'},
-        {id:'plk', name:'Plank (on knees if needed)', muscle:'Core', sets:3, reps:'20–30s', rest:60, why:'Core stability, progress over 4–6 weeks.'},
+        {id:'pdf', name:'Pec Deck / Machine Fly', muscle:'Chest', sets:3, reps:'10–15', rest:60, why:''},
+        {id:'scr', name:'Seated Cable Row', muscle:'Back', sets:3, reps:'8–12', rest:90, why:''},
+        {id:'lpr', name:'Leg Press', muscle:'Quads', sets:3, reps:'10–15', rest:120, why:''},
+        {id:'slc', name:'Seated Leg Curl', muscle:'Hamstrings', sets:3, reps:'10–15', rest:90, why:''},
+        {id:'clr', name:'Cable Lateral Raise (one arm)', muscle:'Shoulders', sets:3, reps:'12–20', rest:60, why:''},
+        {id:'oct', name:'Overhead Cable Tricep Ext.', muscle:'Triceps', sets:2, reps:'10–15', rest:60, why:''},
+        {id:'hc', name:'Hammer Curl', muscle:'Biceps / Brachialis', sets:2, reps:'10–15', rest:60, why:''},
       ]},
   ]
 };
 const TYPE_COL = { push:'var(--blue)', pull:'var(--teal)', legs:'var(--orange)', opt:'var(--amber)', full:'var(--purple)' };
-const MUSCLES = ['Chest','Back','Shoulders','Biceps','Triceps','Quads','Hamstrings','Glutes','Calves','Core','Cardio','Other'];
-const MUSCLE_COL = { Chest:'#5db8f5', Back:'#4de8b0', Shoulders:'#f5c842', Biceps:'#b18cf5', Triceps:'#f5855d', Quads:'#f56060', Hamstrings:'#f58cc6', Glutes:'#9ed42a', Calves:'#6b7870', Core:'#c6f135', Cardio:'#5db8f5', Other:'#8a9690' };
+const MUSCLES = ['Chest','Back','Lats','Shoulders','Rear Delts','Biceps','Biceps / Brachialis','Triceps','Quads','Hamstrings','Glutes','Calves','Core','Cardio','Other'];
+const MUSCLE_COL = { Chest:'#5db8f5', Back:'#4de8b0', Lats:'#4de8b0', Shoulders:'#f5c842', 'Rear Delts':'#f5c842', Biceps:'#b18cf5', 'Biceps / Brachialis':'#b18cf5', Triceps:'#f5855d', Quads:'#f56060', Hamstrings:'#f58cc6', Glutes:'#9ed42a', Calves:'#6b7870', Core:'#c6f135', Cardio:'#5db8f5', Other:'#8a9690' };
 const MEASURE_PARTS = ['Chest','Waist','Hips','L Arm','R Arm','L Thigh','R Thigh','Neck'];
+const DEFAULT_SETTINGS = { unit:'kg', barbell:20, plates:[25,20,15,10,5,2.5,1.25], deloadWeeks:6, sound:true, vibrate:true };
 
 /* ─────────── STORE ─────────── */
 const KEY = 'overload_v4';
 function freshDB() {
   return {
-    settings: { unit:'kg', barbell:20, plates:[25,20,15,10,5,2.5,1.25], deloadWeeks:6, sound:true, vibrate:true },
+    settings: structuredClone(DEFAULT_SETTINGS),
     programs: [structuredClone(DEFAULT_PROGRAM)],
-    activeProgramId: 'ppl',
+    activeProgramId: 'fbabc',
     logs: {},            // exId -> [{date, sets:[{weight,reps}], note, isPR}]
     body: { weight:[], measure:{}, cardio:[] }   // weight:[{date,value}] ; measure:{part:[{date,value}]} ; cardio:[{date,type,min,dist,kcal,note}]
   };
 }
 function loadDB() { try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch { return null; } }
+function isLegacyDefaultPPL(program) {
+  if (!program || program.id !== 'ppl' || program.name !== 'Push / Pull / Legs' || !Array.isArray(program.days) || program.days.length !== 4) return false;
+  const legacyExercises = {
+    push:'mcp,clr,msp,ctp,pd', pull:'scr,lpd,cfp,mpc,sap',
+    legs:'lpr,llc,hab,scr2,cc', opt:'clrb,idc,oct,cfp2,plk'
+  };
+  return program.days.every(day=>Array.isArray(day.ex) && legacyExercises[day.id] === day.ex.map(ex=>ex.id).join(','));
+}
+function normalizeDB(candidate) {
+  const source = candidate && typeof candidate === 'object' && !Array.isArray(candidate) ? candidate : {};
+  const db = { ...source };
+  db.settings = { ...DEFAULT_SETTINGS, ...(source.settings && typeof source.settings === 'object' ? source.settings : {}) };
+  db.programs = Array.isArray(source.programs) && source.programs.length ? source.programs : [structuredClone(DEFAULT_PROGRAM)];
+
+  let replacedLegacyDefault = false;
+  db.programs = db.programs.map(program=>{
+    if (!isLegacyDefaultPPL(program)) return program;
+    replacedLegacyDefault = true;
+    return structuredClone(DEFAULT_PROGRAM);
+  });
+  if (replacedLegacyDefault && source.activeProgramId === 'ppl') db.activeProgramId = 'fbabc';
+  if (!db.programs.some(program=>program.id===db.activeProgramId)) db.activeProgramId = db.programs[0].id;
+
+  db.logs = source.logs && typeof source.logs === 'object' && !Array.isArray(source.logs) ? source.logs : {};
+  Object.keys(db.logs).forEach(id=>{ if (!Array.isArray(db.logs[id])) delete db.logs[id]; });
+  const body = source.body && typeof source.body === 'object' ? source.body : {};
+  db.body = {
+    ...body,
+    weight: Array.isArray(body.weight) ? body.weight : [],
+    measure: body.measure && typeof body.measure === 'object' && !Array.isArray(body.measure) ? body.measure : {},
+    cardio: Array.isArray(body.cardio) ? body.cardio : []
+  };
+  return db;
+}
 function saveDB() {
   localStorage.setItem(KEY, JSON.stringify(DB));
   const el = document.getElementById('storeInfo');
@@ -563,7 +591,8 @@ function migrateV3(db) {
 
 /* ─────────── STATE ─────────── */
 let DB = loadDB();
-if (!DB) { DB = migrateV3(freshDB()); saveDB(); }
+if (!DB) DB = migrateV3(freshDB());
+DB = normalizeDB(DB); saveDB();
 let activeProgram = DB.programs.find(p => p.id === DB.activeProgramId) || DB.programs[0];
 let activeDayId = activeProgram.days[0]?.id;
 const UNIT = () => 'kg';   // metric only
@@ -1219,8 +1248,8 @@ async function importData(file){
   r.onload=async ev=>{
     try{
       const parsed=JSON.parse(ev.target.result);
-      if(parsed.app==='overload'&&parsed.db){ DB=parsed.db; if(Array.isArray(parsed.photos)){ for(const p of parsed.photos) await photoPut(p); } }
-      else { /* legacy v3 raw logs map */ DB=freshDB(); Object.keys(parsed).forEach(k=>{ if(Array.isArray(parsed[k])) DB.logs[k]=parsed[k]; }); }
+      if(parsed.app==='overload'&&parsed.db){ DB=normalizeDB(parsed.db); if(Array.isArray(parsed.photos)){ for(const p of parsed.photos) await photoPut(p); } }
+      else { /* legacy v3 raw logs map */ DB=freshDB(); Object.keys(parsed).forEach(k=>{ if(Array.isArray(parsed[k])) DB.logs[k]=parsed[k]; }); DB=normalizeDB(DB); }
       saveDB();
       activeProgram=DB.programs.find(p=>p.id===DB.activeProgramId)||DB.programs[0];
       activeDayId=activeProgram.days[0]?.id;
