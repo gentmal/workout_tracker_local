@@ -172,7 +172,7 @@ input, button, textarea, select { font-family: inherit; }
 .meta-row { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
 .fgroup { display: flex; flex-direction: column; gap: 4px; }
 .flabel { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
-.finput { font-family: var(--mono); font-size: 14px; background: var(--card2); border: 1.5px solid var(--line2); border-radius: var(--r-sm); color: var(--text); padding: 10px 12px; outline: none; transition: border-color 0.15s; -webkit-appearance: none; min-height: 46px; }
+.finput { font-family: var(--mono); font-size: 14px; background: var(--card2); border: 1.5px solid var(--line2); border-radius: var(--r-sm); color: var(--text); padding: 10px 12px; outline: none; transition: border-color 0.15s; -webkit-appearance: none; appearance: none; min-height: 46px; }
 .finput:focus { border-color: var(--lime); }
 
 /* ── SET TABLE ── */
@@ -183,7 +183,7 @@ input, button, textarea, select { font-family: inherit; }
 .set-row.done-row { border-color: rgba(198,241,53,0.2); background: rgba(198,241,53,0.04); }
 .set-n { font-family: var(--cond); font-size: 20px; font-weight: 800; color: var(--muted); text-align: center; line-height: 1; }
 .set-row.done-row .set-n { color: var(--lime); }
-.num-inp { font-family: var(--mono); font-size: 16px; font-weight: 500; background: var(--card3); border: 1.5px solid var(--line2); border-radius: 8px; color: var(--text); padding: 10px 6px; text-align: center; outline: none; width: 100%; -webkit-appearance: none; -moz-appearance: textfield; transition: border-color 0.15s; min-height: 48px; }
+.num-inp { font-family: var(--mono); font-size: 16px; font-weight: 500; background: var(--card3); border: 1.5px solid var(--line2); border-radius: 8px; color: var(--text); padding: 10px 6px; text-align: center; outline: none; width: 100%; -webkit-appearance: none; -moz-appearance: textfield; appearance: textfield; transition: border-color 0.15s; min-height: 48px; }
 .num-inp::-webkit-outer-spin-button, .num-inp::-webkit-inner-spin-button { -webkit-appearance: none; }
 .num-inp:focus { border-color: var(--lime); }
 .num-inp::placeholder { color: var(--line2); }
@@ -305,7 +305,7 @@ canvas.chart { display: block; width: 100%; height: auto; touch-action: none; }
 .sheet-body { overflow-y: auto; padding: 16px 18px calc(20px + var(--safe-bot)); -webkit-overflow-scrolling: touch; }
 .field { margin-bottom: 14px; }
 .field label { display: block; font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px; }
-.field input, .field select, .field textarea { width: 100%; background: var(--card2); border: 1.5px solid var(--line2); border-radius: var(--r-sm); color: var(--text); padding: 12px; font-size: 15px; outline: none; -webkit-appearance: none; transition: border-color 0.15s; }
+.field input, .field select, .field textarea { width: 100%; background: var(--card2); border: 1.5px solid var(--line2); border-radius: var(--r-sm); color: var(--text); padding: 12px; font-size: 15px; outline: none; -webkit-appearance: none; appearance: none; transition: border-color 0.15s; }
 .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--lime); }
 .field textarea { resize: vertical; min-height: 70px; font-family: var(--sans); }
 .field-row { display: flex; gap: 8px; }
