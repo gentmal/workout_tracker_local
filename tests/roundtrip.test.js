@@ -19,11 +19,13 @@ assert.equal(DEFAULT_PROGRAM.days.find(day=>day.id === 'fbb').warmup, '<strong>W
 assert.equal(DEFAULT_PROGRAM.days.find(day=>day.id === 'fbc').warmup, '<strong>Warm-up (5–7 min):</strong> 5 min incline walk or bike · Band pull-aparts ×15 · Glute bridge ×12 · Bodyweight squat ×10');
 
 const exercises = DEFAULT_PROGRAM.days.flatMap(day=>day.ex);
+assert.deepEqual(exercises.find(ex=>ex.id === 'mcp').ramp, ['Light set × 12', 'Moderate set × 6–8']);
+assert.deepEqual(exercises.find(ex=>ex.id === 'hsq').ramp, ['Empty sled / very light × 12–15', '~50–60% working weight × 8', '~75–80% working weight × 4–5']);
 assert.deepEqual(exercises.find(ex=>ex.id === 'lpd').ramp, ['Light set × 12', 'Moderate set × 6–8']);
 assert.deepEqual(exercises.find(ex=>ex.id === 'rdl').ramp, ['Empty bar / very light × 10', '~50–60% working weight × 6', '~75–80% working weight × 3–4']);
 assert.deepEqual(exercises.find(ex=>ex.id === 'pdf').ramp, ['Light set × 15']);
 assert.deepEqual(exercises.find(ex=>ex.id === 'lpr').ramp, ['Empty sled / very light × 12–15', '~50–60% working weight × 8', '~75–80% working weight × 4–5']);
-assert.deepEqual(exercises.filter(ex=>Object.hasOwn(ex, 'ramp')).map(ex=>ex.id), ['lpd', 'rdl', 'pdf', 'lpr']);
+assert.deepEqual(exercises.filter(ex=>Object.hasOwn(ex, 'ramp')).map(ex=>ex.id), ['mcp', 'hsq', 'lpd', 'rdl', 'pdf', 'lpr']);
 
 const custom = freshDB();
 custom.settings = { ...custom.settings, sound:false, customSetting:'kept' };
@@ -37,6 +39,7 @@ const roundTripped = normalizeDB(JSON.parse(JSON.stringify(payload)).db);
 assert.equal(roundTripped.settings.sound, false);
 assert.equal(roundTripped.settings.customSetting, 'kept');
 assert.equal(roundTripped.programs[0].days[0].ex.at(-1).id, 'custom:any/id');
+assert.deepEqual(roundTripped.programs[0].days[0].ex.find(ex=>ex.id === 'mcp').ramp, ['Light set × 12', 'Moderate set × 6–8']);
 assert.deepEqual(roundTripped.logs.orphan, []);
 assert.ok(!('broken' in roundTripped.logs));
 assert.deepEqual(normalizeDB({ ...freshDB(), logs:{} }).logs, {});
