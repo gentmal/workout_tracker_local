@@ -164,6 +164,8 @@ input, button, textarea, select { font-family: inherit; }
 .ex-body { display: none; border-top: 1px solid var(--line); }
 .ex-card.open .ex-body { display: block; }
 .ex-why { padding: 10px 14px 10px 44px; font-size: 12px; font-style: italic; color: var(--muted); line-height: 1.65; border-bottom: 1px solid var(--line); }
+.ex-ramp { padding: 10px 14px 10px 44px; font-size: 11px; color: var(--muted2); line-height: 1.65; border-bottom: 1px solid var(--line); }
+.ex-ramp strong { display: block; font-family: var(--mono); font-size: 9px; color: var(--amber); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
 .ex-log { padding: 14px; }
 
 /* ── META ROW ── */
@@ -481,20 +483,20 @@ const DEFAULT_PROGRAM = {
         {id:'ctp', name:'Cable Tricep Pushdown (rope)', muscle:'Triceps', sets:2, reps:'10–15', rest:60, why:'Low-fatigue tricep isolation with easy progression.'},
         {id:'cc', name:'Cable Crunch (or Machine)', muscle:'Core', sets:3, reps:'12–20', rest:60, why:'Direct ab work with consistent resistance.'},
       ]},
-    { id:'fbb', name:'Workout B', type:'full', sub:'Lats · Chest · Hamstrings · Rear Delts · Biceps · Calves', warmup:'',
+    { id:'fbb', name:'Workout B', type:'full', sub:'Lats · Chest · Hamstrings · Rear Delts · Biceps · Calves', warmup:'<strong>Warm-up (5–7 min):</strong> 5 min incline walk or bike · Band straight-arm pulldown ×15 · Hip hinge drill ×10 · Face pull ×15',
       ex:[
-        {id:'lpd', name:'Lat Pulldown (neutral)', muscle:'Lats', sets:3, reps:'8–12', rest:90, why:''},
+        {id:'lpd', name:'Lat Pulldown (neutral)', muscle:'Lats', sets:3, reps:'8–12', rest:90, why:'', ramp:['Light set × 12','Moderate set × 6–8']},
         {id:'sip', name:'Low-Incline Smith Press', muscle:'Chest', sets:3, reps:'8–12', rest:90, why:''},
-        {id:'rdl', name:'Romanian Deadlift', muscle:'Hamstrings', sets:2, reps:'8–12', rest:120, why:''},
+        {id:'rdl', name:'Romanian Deadlift', muscle:'Hamstrings', sets:2, reps:'8–12', rest:120, why:'', ramp:['Empty bar / very light × 10','~50–60% working weight × 6','~75–80% working weight × 3–4']},
         {id:'rpd', name:'Reverse Pec Deck', muscle:'Rear Delts', sets:3, reps:'12–20', rest:60, why:''},
         {id:'dbc', name:'Dumbbell Curl', muscle:'Biceps', sets:3, reps:'10–15', rest:60, why:''},
         {id:'scr3', name:'Standing Calf Raise', muscle:'Calves', sets:2, reps:'10–15', rest:60, why:''},
       ]},
-    { id:'fbc', name:'Workout C', type:'full', sub:'Chest · Back · Legs · Delts · Arms', warmup:'',
+    { id:'fbc', name:'Workout C', type:'full', sub:'Chest · Back · Legs · Delts · Arms', warmup:'<strong>Warm-up (5–7 min):</strong> 5 min incline walk or bike · Band pull-aparts ×15 · Glute bridge ×12 · Bodyweight squat ×10',
       ex:[
-        {id:'pdf', name:'Pec Deck / Machine Fly', muscle:'Chest', sets:3, reps:'10–15', rest:60, why:''},
+        {id:'pdf', name:'Pec Deck / Machine Fly', muscle:'Chest', sets:3, reps:'10–15', rest:60, why:'', ramp:['Light set × 15']},
         {id:'scr', name:'Seated Cable Row', muscle:'Back', sets:3, reps:'8–12', rest:90, why:''},
-        {id:'lpr', name:'Leg Press', muscle:'Quads', sets:3, reps:'10–15', rest:120, why:''},
+        {id:'lpr', name:'Leg Press', muscle:'Quads', sets:3, reps:'10–15', rest:120, why:'', ramp:['Empty sled / very light × 12–15','~50–60% working weight × 8','~75–80% working weight × 4–5']},
         {id:'slc', name:'Seated Leg Curl', muscle:'Hamstrings', sets:3, reps:'10–15', rest:90, why:''},
         {id:'clr', name:'Cable Lateral Raise (one arm)', muscle:'Shoulders', sets:3, reps:'12–20', rest:60, why:''},
         {id:'oct', name:'Overhead Cable Tricep Ext.', muscle:'Triceps', sets:2, reps:'10–15', rest:60, why:''},
@@ -689,6 +691,7 @@ function renderDay() {
       </div>
       <div class="ex-body" id="body-${ex.id}">
         ${ex.why?`<div class="ex-why">${esc(ex.why)}</div>`:''}
+        ${Array.isArray(ex.ramp)&&ex.ramp.length?`<div class="ex-ramp"><strong>Ramp-up</strong>${ex.ramp.map(item=>esc(item)).join(' · ')}</div>`:''}
         <div class="ex-log">${buildForm(ex)}${buildHist(ex)}${buildProg(ex)}</div>
       </div>
     </div>`;
