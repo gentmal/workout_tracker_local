@@ -627,6 +627,9 @@ const UNIT = () => 'kg';   // metric only
 
 /* ─────────── UTIL ─────────── */
 const $ = id => document.getElementById(id);
+// Decimal keyboards use a comma in many iOS locales. Keep the input as text so
+// Safari does not discard it, then normalize either separator when saving.
+const parseDecimal = value => Number.parseFloat(String(value ?? '').trim().replace(',', '.'));
 const todayISO = () => { const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().split('T')[0]; };
 const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
@@ -738,7 +741,7 @@ function buildForm(ex) {
   for(let s=1;s<=ex.sets;s++){
     rows+=`<div class="set-row" id="sr-${ex.id}-${s}">
       <div class="set-n">${s}</div>
-      <input class="num-inp" type="number" inputmode="decimal" min="0" step="0.5" placeholder="${UNIT()}" id="w-${ex.id}-${s}" oninput="onInp('${ex.id}',${s})">
+      <input class="num-inp" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="${UNIT()}" id="w-${ex.id}-${s}" oninput="onInp('${ex.id}',${s})">
       <input class="num-inp" type="number" inputmode="numeric" min="0" step="1" placeholder="reps" id="r-${ex.id}-${s}" oninput="onInp('${ex.id}',${s})">
       <div class="set-chk" id="chk-${ex.id}-${s}" onclick="togChk('${ex.id}',${s})"></div>
     </div>`;
@@ -766,7 +769,7 @@ function logIt(id,n){
   const date=$(`date-${id}`).value, note=$(`note-${id}`).value;
   if(!date) return;
   const sets=[]; let hasW=false;
-  for(let s=1;s<=n;s++){ const w=parseFloat($(`w-${id}-${s}`).value)||0; const r=parseInt($(`r-${id}-${s}`).value)||0; sets.push({weight:w,reps:r}); if(w>0)hasW=true; }
+  for(let s=1;s<=n;s++){ const w=parseDecimal($(`w-${id}-${s}`).value)||0; const r=parseInt($(`r-${id}-${s}`).value)||0; sets.push({weight:w,reps:r}); if(w>0)hasW=true; }
   if(!hasW){toast('Enter at least one weight','bad');return;}
   const mw=Math.max(...sets.map(s=>s.weight));
   const pr=isPRweight(id,mw);
@@ -838,7 +841,7 @@ function renderSession() {
       const lastSets=(last&&last.sets)||[];
       const prevW=lastSets[n-1]?.weight||''; const prevR=lastSets[n-1]?.reps||'';
       setsHtml+=`<div class="set-row" id="ssr-${idx}"><div class="set-n">${n}</div>
-        <input class="num-inp" type="number" inputmode="decimal" step="0.5" placeholder="${prevW||UNIT()}" id="sw-${idx}">
+        <input class="num-inp" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="${prevW||UNIT()}" id="sw-${idx}">
         <input class="num-inp" type="number" inputmode="numeric" placeholder="${prevR||'reps'}" id="sr-${idx}">
         <div class="set-chk" onclick="addSessSet(${idx})" style="font-size:18px">✓</div></div>`;
     }
@@ -866,7 +869,7 @@ function renderSession() {
   }
 }
 function addSessSet(idx){
-  const w=parseFloat($(`sw-${idx}`).value)||0, r=parseInt($(`sr-${idx}`).value)||0;
+  const w=parseDecimal($(`sw-${idx}`).value)||0, r=parseInt($(`sr-${idx}`).value)||0;
   if(!w&&!r){toast('Enter weight & reps','bad');return;}
   SESS.ex[idx].sets.push({weight:w,reps:r});
   vibrate(25);
@@ -916,16 +919,16 @@ function endSession(){ clearInterval(sessTimer); clearInterval(restTimer); $('re
 
 /* plate calculator */
 function openPlate(idx){
-  const w=parseFloat($(`sw-${idx}`)?.value)||topW(SESS.ex[idx].ref.id)||0;
+  const w=parseDecimal($(`sw-${idx}`)?.value)||topW(SESS.ex[idx].ref.id)||0;
   openSheet('Plate calculator', `
-    <div class="field"><label>Total weight (${UNIT()})</label><input type="number" id="plW" inputmode="decimal" step="0.5" value="${w||''}" oninput="drawPlates()"></div>
-    <div class="field"><label>Bar weight (${UNIT()})</label><input type="number" id="plBar" inputmode="decimal" step="0.5" value="${DB.settings.barbell}" oninput="drawPlates()"></div>
+    <div class="field"><label>Total weight (${UNIT()})</label><input type="text" id="plW" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" value="${w||''}" oninput="drawPlates()"></div>
+    <div class="field"><label>Bar weight (${UNIT()})</label><input type="text" id="plBar" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" value="${DB.settings.barbell}" oninput="drawPlates()"></div>
     <div class="plate-vis" id="plateVis"></div>
     <div id="plateTxt" style="font-family:var(--mono);font-size:12px;color:var(--muted2);text-align:center"></div>`);
   drawPlates();
 }
 function drawPlates(){
-  const total=parseFloat($('plW').value)||0, bar=parseFloat($('plBar').value)||0;
+  const total=parseDecimal($('plW').value)||0, bar=parseDecimal($('plBar').value)||0;
   const vis=$('plateVis'), txt=$('plateTxt');
   let side=(total-bar)/2;
   if(side<=0){ vis.innerHTML='<span class="plate-empty">Just the bar (or less)</span>'; txt.textContent=''; return; }
@@ -1083,7 +1086,7 @@ function renderWeight(){
   const latest=arr[arr.length-1], first=arr[0];
   const change=latest&&first?(latest.value-first.value):0;
   let html=`<div class="body-quick">
-    <input class="finput bq-input" type="number" inputmode="decimal" step="0.1" id="bwIn" placeholder="Weight ${UNIT()}">
+    <input class="finput bq-input" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="bwIn" placeholder="Weight ${UNIT()}">
     <input class="finput" type="date" id="bwDate" value="${todayISO()}" style="flex:0 0 auto">
     <button class="icon-btn" style="background:var(--lime);color:#ffffff;border-color:var(--lime)" onclick="addWeight()">+</button>
   </div>`;
@@ -1101,7 +1104,7 @@ function renderWeight(){
   $('bodyContent').innerHTML=html;
   if(arr.length) lineChart('chartBW', arr.map(e=>({x:e.date,y:e.value})), 'var(--lime)');
 }
-function addWeight(){ const v=parseFloat($('bwIn').value); const d=$('bwDate').value||todayISO(); if(!v){toast('Enter a weight','bad');return;} DB.body.weight=(DB.body.weight||[]).filter(e=>e.date!==d); DB.body.weight.push({date:d,value:v}); saveDB(); toast('Logged ✓','lime'); renderWeight(); }
+function addWeight(){ const v=parseDecimal($('bwIn').value); const d=$('bwDate').value||todayISO(); if(!v){toast('Enter a weight','bad');return;} DB.body.weight=(DB.body.weight||[]).filter(e=>e.date!==d); DB.body.weight.push({date:d,value:v}); saveDB(); toast('Logged ✓','lime'); renderWeight(); }
 function delWeight(d){ DB.body.weight=(DB.body.weight||[]).filter(e=>e.date!==d); saveDB(); renderWeight(); }
 function renderMeasure(){
   let html='<div class="measure-grid">';
@@ -1121,11 +1124,11 @@ function renderMeasure(){
 }
 function logMeasure(part){
   openSheet('Log '+part, `
-    <div class="field"><label>${part} (cm)</label><input type="number" inputmode="decimal" step="0.1" id="mVal" autofocus></div>
+    <div class="field"><label>${part} (cm)</label><input type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="mVal" autofocus></div>
     <div class="field"><label>Date</label><input type="date" id="mDate" value="${todayISO()}"></div>
     <button class="btn-log" onclick="saveMeasure('${part}')">SAVE</button>`);
 }
-function saveMeasure(part){ const v=parseFloat($('mVal').value), d=$('mDate').value||todayISO(); if(!v){toast('Enter a value','bad');return;} if(!DB.body.measure[part])DB.body.measure[part]=[]; DB.body.measure[part]=DB.body.measure[part].filter(e=>e.date!==d); DB.body.measure[part].push({date:d,value:v}); saveDB(); closeSheet(); toast('Saved ✓','lime'); renderMeasure(); }
+function saveMeasure(part){ const v=parseDecimal($('mVal').value), d=$('mDate').value||todayISO(); if(!v){toast('Enter a value','bad');return;} if(!DB.body.measure[part])DB.body.measure[part]=[]; DB.body.measure[part]=DB.body.measure[part].filter(e=>e.date!==d); DB.body.measure[part].push({date:d,value:v}); saveDB(); closeSheet(); toast('Saved ✓','lime'); renderMeasure(); }
 function renderCardio(){
   const arr=(DB.body.cardio||[]).slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
   let html=`<button class="btn-ghost" style="margin-bottom:14px" onclick="logCardio()">+ Log cardio</button>`;
@@ -1140,7 +1143,7 @@ function logCardio(){
     <div class="field"><label>Type</label><select id="cType">${['Run','Walk','Bike','Row','Swim','Elliptical','Other'].map(t=>`<option>${t}</option>`).join('')}</select></div>
     <div class="field-row">
       <div class="field"><label>Minutes</label><input type="number" inputmode="numeric" id="cMin"></div>
-      <div class="field"><label>Distance (km)</label><input type="number" inputmode="decimal" step="0.1" id="cDist"></div>
+      <div class="field"><label>Distance (km)</label><input type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="cDist"></div>
     </div>
     <div class="field-row">
       <div class="field"><label>Calories</label><input type="number" inputmode="numeric" id="cKcal"></div>
@@ -1149,7 +1152,7 @@ function logCardio(){
     <div class="field"><label>Note</label><input type="text" id="cNote" placeholder="optional"></div>
     <button class="btn-log" onclick="saveCardio()">SAVE</button>`);
 }
-function saveCardio(){ const rec={id:uid(),type:$('cType').value,min:parseInt($('cMin').value)||0,dist:parseFloat($('cDist').value)||0,kcal:parseInt($('cKcal').value)||0,date:$('cDate').value||todayISO(),note:$('cNote').value}; if(!rec.min&&!rec.dist){toast('Enter time or distance','bad');return;} DB.body.cardio=DB.body.cardio||[]; DB.body.cardio.push(rec); saveDB(); closeSheet(); toast('Logged ✓','lime'); renderCardio(); }
+function saveCardio(){ const rec={id:uid(),type:$('cType').value,min:parseInt($('cMin').value)||0,dist:parseDecimal($('cDist').value)||0,kcal:parseInt($('cKcal').value)||0,date:$('cDate').value||todayISO(),note:$('cNote').value}; if(!rec.min&&!rec.dist){toast('Enter time or distance','bad');return;} DB.body.cardio=DB.body.cardio||[]; DB.body.cardio.push(rec); saveDB(); closeSheet(); toast('Logged ✓','lime'); renderCardio(); }
 function delCardio(id){ DB.body.cardio=(DB.body.cardio||[]).filter(c=>c.id!==id); saveDB(); renderCardio(); }
 async function renderPhotos(){
   const photos=(await photoAll()).sort((a,b)=>new Date(b.date)-new Date(a.date));
@@ -1277,11 +1280,11 @@ function renderSettings(){
 function s_set(k,v){ DB.settings[k]=v; saveDB(); renderSettings(); }
 function editPlates(){
   openSheet('Bar & plates', `
-    <div class="field"><label>Bar weight (${UNIT()})</label><input type="number" inputmode="decimal" step="0.5" id="setBar" value="${DB.settings.barbell}"></div>
+    <div class="field"><label>Bar weight (${UNIT()})</label><input type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="setBar" value="${DB.settings.barbell}"></div>
     <div class="field"><label>Available plates (comma separated)</label><input id="setPlates" value="${DB.settings.plates.join(', ')}"></div>
     <button class="btn-log" onclick="savePlates()">SAVE</button>`);
 }
-function savePlates(){ DB.settings.barbell=parseFloat($('setBar').value)||20; DB.settings.plates=$('setPlates').value.split(',').map(x=>parseFloat(x)).filter(x=>x>0).sort((a,b)=>b-a); saveDB(); closeSheet(); renderSettings(); }
+function savePlates(){ DB.settings.barbell=parseDecimal($('setBar').value)||20; DB.settings.plates=$('setPlates').value.split(',').map(x=>parseFloat(x)).filter(x=>x>0).sort((a,b)=>b-a); saveDB(); closeSheet(); renderSettings(); }
 function editDeload(){ openSheet('Deload reminder', `<div class="field"><label>Remind after N weeks (0 = off)</label><input type="number" inputmode="numeric" id="setDeload" value="${DB.settings.deloadWeeks}"></div><button class="btn-log" onclick="saveDeload()">SAVE</button>`); }
 function saveDeload(){ DB.settings.deloadWeeks=parseInt($('setDeload').value)||0; saveDB(); closeSheet(); renderSettings(); calcStats(); }
 async function exportData(){
