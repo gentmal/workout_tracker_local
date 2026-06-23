@@ -168,6 +168,8 @@ input, button, textarea, select { font-family: inherit; }
 .ex-why { padding: 10px 14px 10px 44px; font-size: 12px; font-style: italic; color: var(--muted); line-height: 1.65; border-bottom: 1px solid var(--line); }
 .ex-ramp { padding: 10px 14px 10px 44px; font-size: 11px; color: var(--muted2); line-height: 1.65; border-bottom: 1px solid var(--line); }
 .ex-ramp strong { display: block; font-family: var(--mono); font-size: 9px; color: var(--amber); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
+.ex-cues { padding: 10px 14px 10px 44px; font-size: 12px; color: var(--muted2); line-height: 1.65; border-bottom: 1px solid var(--line); }
+.ex-cues strong { display: block; font-family: var(--mono); font-size: 9px; color: var(--teal); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
 .ex-log { padding: 14px; }
 
 /* ── META ROW ── */
@@ -515,31 +517,31 @@ const DEFAULT_PROGRAM = {
     { id:'fba', name:'Workout A', type:'full', sub:'Chest · Back · Quads · Delts · Triceps · Abs',
       warmup:'<strong>Warm-up (5–7 min):</strong> 5 min incline walk or bike · Band pull-aparts ×15 · Dead bug ×8/side · Glute bridge ×12',
       ex:[
-        {id:'mcp', name:'Machine Chest Press', muscle:'Chest', sets:3, reps:'6–10', rest:120, why:'Primary horizontal press with high stability and low shoulder irritation.', ramp:['Light set × 12','Moderate set × 6–8']},
-        {id:'csr', name:'Chest-Supported Row', muscle:'Back', sets:3, reps:'6–10', rest:120, why:'Heavy horizontal pull for upper-back thickness with low lower-back fatigue.'},
-        {id:'hsq', name:'Hack Squat', muscle:'Quads', sets:3, reps:'8–12', rest:120, why:'Stable squat pattern for quad growth with reduced balance demands.', ramp:['Empty sled / very light × 12–15','~50–60% working weight × 8','~75–80% working weight × 4–5']},
-        {id:'clr', name:'Cable Lateral Raise (one arm)', muscle:'Shoulders', sets:3, reps:'12–20', rest:60, why:'Primary side delt hypertrophy with constant tension.'},
-        {id:'ctp', name:'Cable Tricep Pushdown (rope)', muscle:'Triceps', sets:2, reps:'10–15', rest:60, why:'Low-fatigue tricep isolation with easy progression.'},
-        {id:'cc', name:'Cable Crunch (or Machine)', muscle:'Core', sets:3, reps:'12–20', rest:60, why:'Direct ab work with consistent resistance.'},
+        {id:'mcp', name:'Machine Chest Press', muscle:'Chest', sets:3, reps:'6–10', rest:120, why:'Primary horizontal press with high stability and low shoulder irritation.', ramp:['Light set × 12','Moderate set × 6–8'], cues:'Grip just outside shoulder width, wrists stacked over elbows. Exhale pressing out, inhale on the way back. Keep shoulder blades pinned to the pad — don\'t let elbows flare past ~75°.'},
+        {id:'csr', name:'Chest-Supported Row', muscle:'Back', sets:3, reps:'6–10', rest:120, why:'Heavy horizontal pull for upper-back thickness with low lower-back fatigue.', cues:'Chest stays pinned to the pad the whole set. Pull elbows back and down, squeeze blades together at the top; exhale on the pull, inhale lowering. Don\'t yank with momentum — let the pad take the load, not your lower back.'},
+        {id:'hsq', name:'Hack Squat', muscle:'Quads', sets:3, reps:'8–12', rest:120, why:'Stable squat pattern for quad growth with reduced balance demands.', ramp:['Empty sled / very light × 12–15','~50–60% working weight × 8','~75–80% working weight × 4–5'], cues:'Feet shoulder-width, mid-foot under you. Inhale and brace before descending, exhale driving up. Track knees over toes and avoid letting heels lift off the platform.'},
+        {id:'clr', name:'Cable Lateral Raise (one arm)', muscle:'Shoulders', sets:3, reps:'12–20', rest:60, why:'Primary side delt hypertrophy with constant tension.', cues:'Slight forward lean, lead with the elbow not the hand. Exhale raising to shoulder height, inhale lowering. Avoid shrugging the traps or using a swinging momentum.'},
+        {id:'ctp', name:'Cable Tricep Pushdown (rope)', muscle:'Triceps', sets:2, reps:'10–15', rest:60, why:'Low-fatigue tricep isolation with easy progression.', cues:'Elbows pinned to your sides, spread the rope apart at the bottom. Exhale on the push, inhale controlling the return. Don\'t let elbows drift forward — that shifts work off the triceps.'},
+        {id:'cc', name:'Cable Crunch (or Machine)', muscle:'Core', sets:3, reps:'12–20', rest:60, why:'Direct ab work with consistent resistance.', cues:'Kneel close to the cable, hips stay still throughout. Exhale curling ribs toward hips, inhale on the stretch back. Flex the abs to move the weight — don\'t pull with your arms.'},
       ]},
     { id:'fbb', name:'Workout B', type:'full', sub:'Lats · Chest · Hamstrings · Rear Delts · Biceps · Calves', warmup:'<strong>Warm-up (5–7 min):</strong> 5 min incline walk or bike · Band straight-arm pulldown ×15 · Hip hinge drill ×10 · Face pull ×15',
       ex:[
-        {id:'lpd', name:'Lat Pulldown (neutral)', muscle:'Lats', sets:3, reps:'8–12', rest:90, why:'', ramp:['Light set × 12','Moderate set × 6–8']},
-        {id:'sip', name:'Low-Incline Smith Press', muscle:'Chest', sets:3, reps:'8–12', rest:90, why:''},
-        {id:'rdl', name:'Romanian Deadlift', muscle:'Hamstrings', sets:2, reps:'8–12', rest:120, why:'', ramp:['Empty bar / very light × 10','~50–60% working weight × 6','~75–80% working weight × 3–4']},
-        {id:'rpd', name:'Reverse Pec Deck', muscle:'Rear Delts', sets:3, reps:'12–20', rest:60, why:''},
-        {id:'dbc', name:'Dumbbell Curl', muscle:'Biceps', sets:3, reps:'10–15', rest:60, why:''},
-        {id:'scr3', name:'Standing Calf Raise', muscle:'Calves', sets:2, reps:'10–15', rest:60, why:''},
+        {id:'lpd', name:'Lat Pulldown (neutral)', muscle:'Lats', sets:3, reps:'8–12', rest:90, why:'', ramp:['Light set × 12','Moderate set × 6–8'], cues:'Neutral grip just outside shoulder width. Exhale pulling elbows down toward ribs, inhale on the return. Avoid leaning back excessively or using momentum to yank the bar down.'},
+        {id:'sip', name:'Low-Incline Smith Press', muscle:'Chest', sets:3, reps:'8–12', rest:90, why:'', cues:'Grip just outside shoulders, feet flat on the floor. Inhale lowering the bar to mid-chest, exhale pressing up. Keep a slight arch and don\'t bounce the bar off your chest.'},
+        {id:'rdl', name:'Romanian Deadlift', muscle:'Hamstrings', sets:2, reps:'8–12', rest:120, why:'', ramp:['Empty bar / very light × 10','~50–60% working weight × 6','~75–80% working weight × 3–4'], cues:'Soft knees, hinge at the hips with the bar close to your legs. Inhale and brace before lowering, exhale driving hips forward to stand. Keep the lower back neutral — stop the descent before it rounds.'},
+        {id:'rpd', name:'Reverse Pec Deck', muscle:'Rear Delts', sets:3, reps:'12–20', rest:60, why:'', cues:'Light grip, elbows slightly bent, lead with the elbows not the hands. Exhale squeezing shoulder blades together, inhale on the return. Avoid shrugging or using momentum to swing the arms back.'},
+        {id:'dbc', name:'Dumbbell Curl', muscle:'Biceps', sets:3, reps:'10–15', rest:60, why:'', cues:'Elbows pinned at your sides for the whole set. Exhale curling up, inhale lowering under control. Avoid swinging the torso or letting elbows drift forward to cheat the weight up.'},
+        {id:'scr3', name:'Standing Calf Raise', muscle:'Calves', sets:2, reps:'10–15', rest:60, why:'', cues:'Full stretch at the bottom with a brief pause. Exhale rising onto your toes, inhale lowering slowly. Avoid bouncing out of the bottom — control the lowering phase.'},
       ]},
     { id:'fbc', name:'Workout C', type:'full', sub:'Chest · Back · Legs · Delts · Arms', warmup:'<strong>Warm-up (5–7 min):</strong> 5 min incline walk or bike · Band pull-aparts ×15 · Glute bridge ×12 · Bodyweight squat ×10',
       ex:[
-        {id:'pdf', name:'Pec Deck / Machine Fly', muscle:'Chest', sets:3, reps:'10–15', rest:60, why:'', ramp:['Light set × 15']},
-        {id:'scr', name:'Seated Cable Row', muscle:'Back', sets:3, reps:'8–12', rest:90, why:''},
-        {id:'lpr', name:'Leg Press', muscle:'Quads', sets:3, reps:'10–15', rest:120, why:'', ramp:['Empty sled / very light × 12–15','~50–60% working weight × 8','~75–80% working weight × 4–5']},
-        {id:'slc', name:'Seated Leg Curl', muscle:'Hamstrings', sets:3, reps:'10–15', rest:90, why:''},
-        {id:'clr', name:'Cable Lateral Raise (one arm)', muscle:'Shoulders', sets:3, reps:'12–20', rest:60, why:''},
-        {id:'oct', name:'Overhead Cable Tricep Ext.', muscle:'Triceps', sets:2, reps:'10–15', rest:60, why:''},
-        {id:'hc', name:'Hammer Curl', muscle:'Biceps / Brachialis', sets:2, reps:'10–15', rest:60, why:''},
+        {id:'pdf', name:'Pec Deck / Machine Fly', muscle:'Chest', sets:3, reps:'10–15', rest:60, why:'', ramp:['Light set × 15'], cues:'Elbows slightly bent, chest up and back against the pad. Exhale bringing hands together, inhale opening with control. Don\'t let the weight slam at the stretch — ease into it.'},
+        {id:'scr', name:'Seated Cable Row', muscle:'Back', sets:3, reps:'8–12', rest:90, why:'', cues:'Chest up, slight lean back at the finish, knees softly bent. Exhale pulling the handle to your torso, inhale extending arms forward. Avoid rounding the back or rocking with body english to move the weight.'},
+        {id:'lpr', name:'Leg Press', muscle:'Quads', sets:3, reps:'10–15', rest:120, why:'', ramp:['Empty sled / very light × 12–15','~50–60% working weight × 8','~75–80% working weight × 4–5'], cues:'Feet shoulder-width on the platform, mid-foot placement. Inhale lowering, exhale pressing up without slamming the knees straight. Keep your lower back flat on the pad — don\'t let it round off as you go deep.'},
+        {id:'slc', name:'Seated Leg Curl', muscle:'Hamstrings', sets:3, reps:'10–15', rest:90, why:'', cues:'Toes pointed up, ankles flexed throughout. Exhale curling heels down, inhale on the release. Keep hips pressed into the pad — don\'t let them lift to cheat the rep.'},
+        {id:'clr', name:'Cable Lateral Raise (one arm)', muscle:'Shoulders', sets:3, reps:'12–20', rest:60, why:'', cues:'Slight forward lean, lead with the elbow not the hand. Exhale raising to shoulder height, inhale lowering. Avoid shrugging the traps or using a swinging momentum.'},
+        {id:'oct', name:'Overhead Cable Tricep Ext.', muscle:'Triceps', sets:2, reps:'10–15', rest:60, why:'', cues:'Elbows close to your head, upper arms stay still. Exhale extending the forearms up, inhale lowering behind the head. Avoid flaring the elbows out to the sides.'},
+        {id:'hc', name:'Hammer Curl', muscle:'Biceps / Brachialis', sets:2, reps:'10–15', rest:60, why:'', cues:'Neutral grip, elbows pinned at your sides. Exhale curling up, inhale lowering under control. Avoid swinging or using shoulder momentum to start the rep.'},
       ]},
   ]
 };
@@ -761,6 +763,7 @@ function renderDay() {
       <div class="ex-body" id="body-${ex.id}">
         ${ex.why?`<div class="ex-why">${esc(ex.why)}</div>`:''}
         ${Array.isArray(ex.ramp)&&ex.ramp.length?`<div class="ex-ramp"><strong>Ramp-up</strong>${ex.ramp.map(item=>esc(item)).join(' · ')}</div>`:''}
+        ${ex.cues?`<div class="ex-cues"><strong>Form cues</strong>${esc(ex.cues)}</div>`:''}
         <div class="ex-log">${buildForm(ex)}${buildHist(ex)}${buildProg(ex)}</div>
       </div>
     </div>`;
@@ -1381,7 +1384,7 @@ function moveEx(pid,did,i,dir){ const d=DB.programs.find(x=>x.id===pid).days.fin
 function delEx(pid,did,exid){ if(!confirm('Remove this exercise? Its logged history is kept but hidden.'))return; const d=DB.programs.find(x=>x.id===pid).days.find(x=>x.id===did); d.ex=d.ex.filter(e=>e.id!==exid); saveDB(); openDayEditor(pid,did); if(pid===activeProgram.id)renderDay(); }
 function editEx(pid,did,exid){
   const d=DB.programs.find(x=>x.id===pid).days.find(x=>x.id===did);
-  const e=exid?d.ex.find(x=>x.id===exid):{name:'',muscle:'Chest',sets:3,reps:'10–12',rest:90,why:''};
+  const e=exid?d.ex.find(x=>x.id===exid):{name:'',muscle:'Chest',sets:3,reps:'10–12',rest:90,why:'',cues:''};
   openSheet(exid?'Edit exercise':'New exercise', `
     <div class="field"><label>Exercise name</label><input id="exName" value="${esc(e.name)}"></div>
     <div class="field"><label>Muscle group</label><select id="exMuscle">${MUSCLES.map(m=>`<option${m===e.muscle?' selected':''}>${m}</option>`).join('')}</select></div>
@@ -1391,12 +1394,13 @@ function editEx(pid,did,exid){
       <div class="field"><label>Rest (s)</label><input type="number" inputmode="numeric" id="exRest" value="${e.rest}"></div>
     </div>
     <div class="field"><label>Why / cue (optional)</label><textarea id="exWhy">${esc(e.why||'')}</textarea></div>
+    <div class="field"><label>Form cues (optional)</label><textarea id="exCues" placeholder="Grip, breathing, common mistakes...">${esc(e.cues||'')}</textarea></div>
     <button class="btn-log" onclick="saveEx('${pid}','${did}',${exid?`'${exid}'`:'null'})">SAVE</button>`);
 }
 function saveEx(pid,did,exid){
   const d=DB.programs.find(x=>x.id===pid).days.find(x=>x.id===did);
   const name=$('exName').value.trim(); if(!name){toast('Enter a name','bad');return;}
-  const data={name,muscle:$('exMuscle').value,sets:parseInt($('exSets').value)||3,reps:$('exReps').value.trim()||'10–12',rest:parseInt($('exRest').value)||60,why:$('exWhy').value.trim()};
+  const data={name,muscle:$('exMuscle').value,sets:parseInt($('exSets').value)||3,reps:$('exReps').value.trim()||'10–12',rest:parseInt($('exRest').value)||60,why:$('exWhy').value.trim(),cues:$('exCues').value.trim()};
   if(exid){ const e=d.ex.find(x=>x.id===exid); Object.assign(e,data); }
   else d.ex.push({id:uid(),...data});
   saveDB(); openDayEditor(pid,did); if(pid===activeProgram.id){renderTabs();renderDay();}
