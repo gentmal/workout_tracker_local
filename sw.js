@@ -1,6 +1,6 @@
 /* OVERLOAD service worker — offline-first cache.
    Bump CACHE version to force clients to pull new assets. */
-const CACHE = 'overload-v4-5';
+const CACHE = 'overload-v4-6';
 const ASSETS = [
   './',
   './index.html',

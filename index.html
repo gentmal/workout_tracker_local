@@ -247,6 +247,13 @@ canvas.chart { display: block; width: 100%; height: auto; touch-action: none; }
 .muscle-bar-bg { flex: 1; height: 8px; background: var(--card3); border-radius: 5px; overflow: hidden; }
 .muscle-bar { height: 100%; border-radius: 5px; transition: width 0.4s; }
 .muscle-val { font-family: var(--mono); font-size: 10px; color: var(--muted); min-width: 34px; text-align: right; }
+.lvl-row { margin-bottom: 16px; }
+.lvl-top { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.lvl-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.lvl-name { font-size: 13.5px; font-weight: 600; flex: 1; }
+.lvl-num { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.lvl-sub { font-family: var(--mono); font-size: 10.5px; color: var(--muted); margin-top: 5px; }
+.lvl-warn { color: var(--amber); margin-left: 8px; }
 
 /* ── OVERVIEW ── */
 .ov-list { display: flex; flex-direction: column; gap: 7px; }
@@ -1000,15 +1007,22 @@ function drawPlates(){
 }
 
 /* ─────────── PROGRESS ─────────── */
-let progEx=null, progRange=90;
+let progEx=null, progRange=90, progTab='charts';
 function renderProgress(){
   const page=$('progPage');
-  const exList=allEx().filter(e=>getHist(e.id).length);
   const hasAny=Object.values(DB.logs).some(a=>a&&a.length);
   if(!hasAny){ page.innerHTML=`<div class="empty-state">No data yet.<br>Log a session to see charts.</div>`; return; }
+  page.innerHTML=`
+    <div class="seg">${[['charts','Charts'],['levels','Levels']].map(t=>`<button class="${progTab===t[0]?'on':''}" onclick="progTab='${t[0]}';renderProgress()">${t[1]}</button>`).join('')}</div>
+    <div id="progContent"></div>`;
+  if(progTab==='levels') renderLevelsTab();
+  else renderChartsTab();
+}
+function renderChartsTab(){
+  const exList=allEx().filter(e=>getHist(e.id).length);
   if(!progEx||!findEx(progEx)) progEx=(exList[0]||allEx()[0])?.id;
   let opts=''; activeProgram.days.forEach(d=>{ opts+=`<optgroup label="${esc(d.name)}">`; d.ex.forEach(e=>{ opts+=`<option value="${e.id}"${e.id===progEx?' selected':''}>${esc(e.name)}</option>`; }); opts+='</optgroup>'; });
-  page.innerHTML=`
+  $('progContent').innerHTML=`
     <div class="section-h">Exercise progress</div>
     <select class="ex-select" id="progExSel" onchange="progEx=this.value;drawProgCharts()">${opts}</select>
     <div class="seg" id="rangeSeg">
@@ -1025,6 +1039,10 @@ function renderProgress(){
     <div class="section-h">Personal records</div>
     <div class="ov-list" id="prList"></div>`;
   drawProgCharts(); drawMuscle(); drawPRs();
+}
+function renderLevelsTab(){
+  $('progContent').innerHTML=`<div class="section-h">Muscle levels<span class="cb-sub" style="margin-left:auto">weekly training volume</span></div><div class="card-block" id="levelsBox"></div>`;
+  drawLevels();
 }
 function rangeData(id){
   const cut=Date.now()-progRange*86400000;
@@ -1072,6 +1090,52 @@ function drawMuscle(){
 function drawPRs(){
   const rows=allEx().map(e=>({name:e.name, w:topW(e.id), cnt:(DB.logs[e.id]||[]).length})).filter(e=>e.w).sort((a,b)=>b.w-a.w);
   $('prList').innerHTML=rows.length?rows.map(e=>`<div class="ov-row"><div class="ov-name">${esc(e.name)}</div><div class="ov-right"><div class="ov-kg">${e.w}<span> ${UNIT()}</span></div><div class="ov-cnt">${e.cnt} session${e.cnt!==1?'s':''}</div></div></div>`).join(''):'<div class="chart-empty">No PRs yet.</div>';
+}
+/* Weekly hard-set volume zones (Schoenfeld dose-response meta-analyses; RP MEV/MAV/MRV landmarks) */
+function xpForWeek(sets){ if(sets>=20)return 2; if(sets>=11)return 6; if(sets>=4)return 10; if(sets>=1)return 2; return 0; }
+function zoneLabel(sets){ if(sets>=20)return 'Overreaching'; if(sets>=11)return 'High volume'; if(sets>=4)return 'Growth zone'; if(sets>=1)return 'Below target'; return 'Untrained'; }
+function xpForLevel(l){ return Math.round(50*Math.pow(l-1,1.5)); }
+function levelFromXp(xp){ let l=1; while(xpForLevel(l+1)<=xp) l++; return l; }
+function computeMuscleLevels(){
+  const curWk=Math.floor(Date.now()/604800000); // 7-day buckets, epoch-aligned
+  const byMuscle={};
+  Object.entries(DB.logs).forEach(([id,arr])=>{
+    const m=findEx(id)?.muscle||'Other';
+    (arr||[]).forEach(e=>{
+      if(!e.date) return;
+      const cnt=(e.sets||[]).filter(s=>s.weight&&s.reps).length;
+      if(!cnt) return;
+      const wk=Math.floor(new Date(e.date).getTime()/604800000);
+      byMuscle[m]=byMuscle[m]||{};
+      byMuscle[m][wk]=(byMuscle[m][wk]||0)+cnt;
+    });
+  });
+  return Object.entries(byMuscle).map(([m,weeks])=>{
+    let wk=Math.min(...Object.keys(weeks).map(Number));
+    let xp=0, untrained=0;
+    for(; wk<=curWk; wk++){
+      const sets=weeks[wk]||0;
+      if(sets>0){ xp+=xpForWeek(sets); untrained=0; }
+      else { untrained++; if(untrained>2) xp=Math.max(0,xp-8); }
+    }
+    const level=levelFromXp(xp);
+    return { muscle:m, level, xp, xpBase:xpForLevel(level), xpNext:xpForLevel(level+1), thisWeekSets:weeks[curWk]||0, untrained };
+  }).sort((a,b)=>b.level-a.level || b.xp-a.xp);
+}
+function drawLevels(){
+  const box=$('levelsBox');
+  const rows=computeMuscleLevels();
+  if(!rows.length){ box.innerHTML='<div class="chart-empty">No volume logged yet.</div>'; return; }
+  box.innerHTML=rows.map(r=>{
+    const pct=Math.min(100,Math.round((r.xp-r.xpBase)/(r.xpNext-r.xpBase)*100));
+    const col=MUSCLE_COL[r.muscle]||'var(--muted2)';
+    const warn=r.untrained>2?`<span class="lvl-warn">⚠ ${r.untrained}w untrained</span>`:'';
+    return `<div class="lvl-row">
+      <div class="lvl-top"><span class="lvl-dot" style="background:${col}"></span><span class="lvl-name">${esc(r.muscle)}</span><span class="lvl-num">Lv.${r.level}</span></div>
+      <div class="muscle-bar-bg"><div class="muscle-bar" style="width:${pct}%;background:${col}"></div></div>
+      <div class="lvl-sub">${r.thisWeekSets} set${r.thisWeekSets!==1?'s':''} this week — ${zoneLabel(r.thisWeekSets)}${warn}</div>
+    </div>`;
+  }).join('');
 }
 
 /* ─────────── CHARTS (canvas) ─────────── */
