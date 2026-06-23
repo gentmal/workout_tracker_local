@@ -106,7 +106,7 @@ input, button, textarea, select { font-family: inherit; }
 .screen { display: none; }
 .screen.active { display: block; animation: fade 0.2s ease; }
 @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
-.page { padding: calc(var(--safe-top) + var(--topbar-h) + 18px) 16px 28px; max-width: 680px; margin: 0 auto; }
+.page { padding: calc(var(--safe-top) + var(--topbar-h) + 18px) 16px 28px; max-width: 680px; margin: 0 auto; min-height: calc(100vh + 1px); }
 .section-h { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); padding: 0 4px; margin: 22px 0 9px; display: flex; align-items: center; gap: 8px; }
 .section-h:first-child { margin-top: 0; }
 .section-h .sh-act { margin-left: auto; color: var(--lime); font-weight: 500; cursor: pointer; -webkit-tap-highlight-color: transparent; }
