@@ -183,6 +183,9 @@ input, button, textarea, select { font-family: inherit; }
 .set-head span:first-child { text-align: left; }
 .set-row { display: grid; grid-template-columns: 34px 1fr 1fr 38px; gap: 6px; align-items: center; padding: 5px; border-radius: 10px; margin-bottom: 5px; background: var(--card2); border: 1px solid var(--line); transition: border-color 0.15s; }
 .set-row.done-row { border-color: rgba(99,102,241,0.2); background: rgba(99,102,241,0.04); }
+.swipe-wrap { position: relative; overflow: hidden; border-radius: 10px; margin-bottom: 5px; }
+.swipe-wrap .set-row { margin-bottom: 0; position: relative; z-index: 1; }
+.swipe-bg { position: absolute; inset: 0; background: var(--red); color: #fff; display: flex; align-items: center; justify-content: flex-end; padding-right: 16px; font-size: 13px; font-weight: 700; border-radius: 10px; }
 .set-n { font-family: var(--cond); font-size: 20px; font-weight: 800; color: var(--muted); text-align: center; line-height: 1; }
 .set-row.done-row .set-n { color: var(--lime); }
 .num-inp { font-family: var(--mono); font-size: 16px; font-weight: 500; background: var(--card3); border: 1.5px solid var(--line2); border-radius: 8px; color: var(--text); padding: 10px 6px; text-align: center; outline: none; width: 100%; -webkit-appearance: none; -moz-appearance: textfield; appearance: textfield; transition: border-color 0.15s; min-height: 48px; }
@@ -642,6 +645,24 @@ function getHist(id) { return (DB.logs[id]||[]).slice().sort((a,b)=>new Date(b.d
 function topW(id) { let b=0; getHist(id).forEach(e=>(e.sets||[]).forEach(s=>{ if(s.weight>b) b=s.weight; })); return b||null; }
 function isPRweight(id, w) { return w > (topW(id)||0); }
 function vibrate(ms) { if (DB.settings.vibrate && navigator.vibrate) navigator.vibrate(ms); }
+function trackDrag(el, {onStart, onMove, onEnd}) {
+  el.addEventListener('touchstart', e=>{
+    const ctx = onStart(e);
+    if(!ctx) return;
+    const t=e.touches[0]; const sx=t.clientX, sy=t.clientY, st=Date.now(); let locked=null;
+    function move(ev){
+      const tt=ev.touches[0]; const dx=tt.clientX-sx, dy=tt.clientY-sy;
+      if(!locked){ if(Math.abs(dx)<8&&Math.abs(dy)<8) return; locked=Math.abs(dx)>Math.abs(dy)?'x':'y'; }
+      if(onMove(ctx,dx,dy,locked,ev)) ev.preventDefault();
+    }
+    function up(ev){
+      document.removeEventListener('touchmove',move); document.removeEventListener('touchend',up); document.removeEventListener('touchcancel',up);
+      const tt=ev.changedTouches[0]; onEnd(ctx, tt.clientX-sx, tt.clientY-sy, Date.now()-st, locked);
+    }
+    document.addEventListener('touchmove',move,{passive:false});
+    document.addEventListener('touchend',up); document.addEventListener('touchcancel',up);
+  }, {passive:true});
+}
 
 /* ─────────── NAV ─────────── */
 function goScreen(id) {
@@ -735,6 +756,23 @@ function renderDay() {
     </div>`;
   });
   $('dayContent').innerHTML=html;
+}
+function bindDaySwipe(){
+  const el=$('dayContent');
+  trackDrag(el, {
+    onStart: ()=> activeProgram.days.length>1 ? {} : null,
+    onMove: (ctx,dx,dy,locked)=>{ if(locked!=='x') return false; el.style.transition='none'; el.style.transform=`translateX(${dx}px)`; return true; },
+    onEnd: (ctx,dx,dy,dt,locked)=>{
+      el.style.transition='transform 0.2s ease';
+      if(locked==='x' && (Math.abs(dx)>60 || (Math.abs(dx)>20 && dt<250))){
+        const days=activeProgram.days, i=days.findIndex(d=>d.id===activeDayId);
+        activeDayId=days[(i+(dx<0?1:-1)+days.length)%days.length].id;
+        vibrate(10);
+      }
+      el.style.transform='translateX(0)';
+      setTimeout(()=>{ el.style.transition=''; renderTabs(); renderDay(); },200);
+    }
+  });
 }
 function buildForm(ex) {
   let rows='';
@@ -834,7 +872,7 @@ function renderSession() {
     if(complete)done++;
     let setsHtml='';
     item.sets.forEach((s,i)=>{
-      setsHtml+=`<div class="set-row done-row"><div class="set-n">${i+1}</div><div style="font-family:var(--mono);font-size:14px;text-align:center">${s.weight} ${UNIT()}</div><div style="font-family:var(--mono);font-size:14px;text-align:center">${s.reps} reps</div><div class="set-chk on" onclick="rmSessSet(${idx},${i})">✕</div></div>`;
+      setsHtml+=`<div class="swipe-wrap" data-idx="${idx}" data-i="${i}"><div class="swipe-bg">🗑 Delete</div><div class="set-row done-row"><div class="set-n">${i+1}</div><div style="font-family:var(--mono);font-size:14px;text-align:center">${s.weight} ${UNIT()}</div><div style="font-family:var(--mono);font-size:14px;text-align:center">${s.reps} reps</div><div class="set-chk on" onclick="rmSessSet(${idx},${i})">✕</div></div></div>`;
     });
     const n=item.sets.length+1;
     if(!complete){
@@ -878,8 +916,28 @@ function addSessSet(idx){
   startRest(rest, SESS.ex[idx].ref.name);
 }
 function rmSessSet(idx,i){ SESS.ex[idx].sets.splice(i,1); renderSession(); }
+function bindSetSwipe(){
+  trackDrag($('sessScroll'), {
+    onStart: e=>{ const wrap=e.target.closest('.swipe-wrap'); return wrap ? {wrap, row:wrap.querySelector('.set-row')} : null; },
+    onMove: (ctx,dx,dy,locked)=>{ if(locked!=='x') return false; ctx.row.style.transition='none'; ctx.row.style.transform=`translateX(${Math.min(0,dx)}px)`; return true; },
+    onEnd: (ctx,dx,dy,dt,locked)=>{
+      ctx.row.style.transition='transform 0.18s ease';
+      if(locked==='x' && dx<-70){
+        ctx.row.style.transform='translateX(-100%)'; vibrate(15);
+        setTimeout(()=>rmSessSet(+ctx.wrap.dataset.idx, +ctx.wrap.dataset.i), 180);
+      } else {
+        ctx.row.style.transform='translateX(0)';
+      }
+    }
+  });
+}
 function completeEx(idx){ SESS.ex[idx].done=!SESS.ex[idx].done; if(SESS.ex[idx].done){ const nxt=SESS.ex.findIndex((x,i)=>i>idx&&!x.done); SESS.curIdx=nxt<0?idx:nxt; } renderSession(); }
+function unlockAudio(){
+  if(!DB.settings.sound) return;
+  try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended') audioCtx.resume(); }catch{}
+}
 function startRest(sec, nextName){
+  unlockAudio();
   clearInterval(restTimer); restTotal=sec; restEnd=Date.now()+sec*1000;
   $('restNext').textContent=nextName?('after '+nextName):'';
   const fill=$('restProgFill'); if(fill) fill.style.width='100%';
@@ -896,7 +954,7 @@ function addRest(s){ restEnd+=s*1000; tickRest(); }
 function skipRest(){ clearInterval(restTimer); $('restBar').classList.remove('show'); }
 function beep(){
   if(!DB.settings.sound) return;
-  try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); const o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); o.frequency.value=880; o.type='sine'; g.gain.setValueAtTime(0.001,audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.3,audioCtx.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.5); o.start(); o.stop(audioCtx.currentTime+0.5); }catch{}
+  try{ if(!audioCtx) return; const o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); o.frequency.value=880; o.type='sine'; g.gain.setValueAtTime(0.001,audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.3,audioCtx.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.5); o.start(); o.stop(audioCtx.currentTime+0.5); }catch{}
 }
 function finishSession(){
   if(!SESS) return;
@@ -1320,6 +1378,23 @@ function clearAll(){
 /* ─────────── SHEET ─────────── */
 function openSheet(title, bodyHTML){ $('sheetTitle').textContent=title; $('sheetBody').innerHTML=bodyHTML; $('sheetBack').classList.add('show'); $('sheet').classList.add('show'); }
 function closeSheet(){ $('sheetBack').classList.remove('show'); $('sheet').classList.remove('show'); }
+function bindSheetSwipe(){
+  const sheet=$('sheet');
+  trackDrag(sheet, {
+    onStart: e=> e.target.closest('.sheet-grip,.sheet-head') && !e.target.closest('.sheet-close') ? {} : null,
+    onMove: (ctx,dx,dy,locked)=>{ if(locked!=='y'||dy<0) return false; sheet.style.transition='none'; sheet.style.transform=`translateY(${dy}px)`; return true; },
+    onEnd: (ctx,dx,dy,dt,locked)=>{
+      sheet.style.transition='transform 0.28s cubic-bezier(.32,.72,.34,1)';
+      if(locked==='y' && (dy>110 || (dy>40 && dt<250))){
+        sheet.style.transform='translateY(100%)'; vibrate(10);
+        setTimeout(()=>{ closeSheet(); sheet.style.transition=''; sheet.style.transform=''; },260);
+      } else {
+        sheet.style.transform='translateY(0)';
+        setTimeout(()=>{ sheet.style.transition=''; sheet.style.transform=''; },280);
+      }
+    }
+  });
+}
 
 /* ─────────── TOAST ─────────── */
 function toast(msg,type){ const t=$('toast'); t.textContent=msg; t.className='toast '+(type||'')+' show'; clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2200); }
@@ -1330,6 +1405,7 @@ $('photoFile').addEventListener('change', e=>{ if(e.target.files[0]) handlePhoto
 window.addEventListener('resize', ()=>{ if($('screen-progress').classList.contains('active')) drawProgCharts(); if($('screen-body').classList.contains('active')&&bodyTab==='weight') renderWeight(); });
 
 renderProgSelect(); calcStats(); renderTabs(); renderDay();
+bindDaySwipe(); bindSetSwipe(); bindSheetSwipe();
 if(DB._migrated){ toast(`Imported ${DB._migrated} past entries`,'lime'); delete DB._migrated; saveDB(); }
 
 if('serviceWorker' in navigator){ window.addEventListener('load', ()=>navigator.serviceWorker.register('./sw.js').catch(()=>{})); }
