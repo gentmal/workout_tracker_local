@@ -249,13 +249,15 @@ canvas.chart { display: block; width: 100%; height: auto; touch-action: none; }
 .muscle-bar-bg { flex: 1; height: 8px; background: var(--card3); border-radius: 5px; overflow: hidden; }
 .muscle-bar { height: 100%; border-radius: 5px; transition: width 0.4s; }
 .muscle-val { font-family: var(--mono); font-size: 10px; color: var(--muted); min-width: 34px; text-align: right; }
-.lvl-row { margin-bottom: 16px; }
+.lvl-row { margin-bottom: 18px; }
 .lvl-top { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
 .lvl-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 .lvl-name { font-size: 13.5px; font-weight: 600; flex: 1; }
-.lvl-num { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.lvl-num { font-family: var(--mono); font-size: 11px; color: var(--text); text-align: right; line-height: 1.3; }
+.lvl-xpleft { font-size: 9px; color: var(--muted); display: block; }
 .lvl-sub { font-family: var(--mono); font-size: 10.5px; color: var(--muted); margin-top: 5px; }
-.lvl-warn { color: var(--amber); margin-left: 8px; }
+.lvl-hint { font-family: var(--mono); font-size: 10px; color: var(--muted2); margin-top: 3px; }
+.lvl-warn { color: var(--amber); margin-left: 6px; }
 
 /* ── OVERVIEW ── */
 .ov-list { display: flex; flex-direction: column; gap: 7px; }
@@ -1132,21 +1134,35 @@ function drawPRs(){
   const rows=allEx().map(e=>({name:e.name, w:topW(e.id), cnt:(DB.logs[e.id]||[]).length})).filter(e=>e.w).sort((a,b)=>b.w-a.w);
   $('prList').innerHTML=rows.length?rows.map(e=>`<div class="ov-row"><div class="ov-name">${esc(e.name)}</div><div class="ov-right"><div class="ov-kg">${e.w}<span> ${UNIT()}</span></div><div class="ov-cnt">${e.cnt} session${e.cnt!==1?'s':''}</div></div></div>`).join(''):'<div class="chart-empty">No PRs yet.</div>';
 }
-/* Weekly hard-set volume zones (Schoenfeld dose-response meta-analyses; RP MEV/MAV/MRV landmarks) */
-function xpForWeek(sets){ if(sets>=20)return 2; if(sets>=11)return 6; if(sets>=4)return 10; if(sets>=1)return 2; return 0; }
-function zoneLabel(sets){ if(sets>=20)return 'Overreaching'; if(sets>=11)return 'High volume'; if(sets>=4)return 'Growth zone'; if(sets>=1)return 'Below target'; return 'Untrained'; }
+/* Weekly hard-set volume zones (Schoenfeld dose-response; RP MEV/MAV/MRV landmarks)
+   XP is monotonically increasing up to the optimal range, with a small decrease for overreaching. */
+const ZONE_COLS=['var(--muted)','var(--amber)','var(--teal)','var(--lime)','var(--orange)'];
+function zoneIdx(sets){ return sets>=20?4:sets>=10?3:sets>=4?2:sets>=1?1:0; }
+function xpForWeek(sets){ return [0,3,8,12,10][zoneIdx(sets)]; }
+function zoneLabel(sets){ return ['Not trained','Below MEV','Building','Optimal','Overreaching'][zoneIdx(sets)]; }
+function zoneHint(sets){
+  if(sets===0) return 'Log 4+ sets this week to enter the building zone';
+  if(sets<4)   return `${4-sets} more set${4-sets!==1?'s':''} to reach the building zone`;
+  if(sets<10)  return `${10-sets} more set${10-sets!==1?'s':''} to reach optimal volume`;
+  if(sets<20)  return '';
+  return 'Above MRV — consider reducing volume or scheduling a deload';
+}
 function xpForLevel(l){ return Math.round(50*Math.pow(l-1,1.5)); }
 function levelFromXp(xp){ let l=1; while(xpForLevel(l+1)<=xp) l++; return l; }
+const MON_ANCHOR=345600000; // shift epoch to Monday 1970-01-05 so week buckets are Mon–Sun
 function computeMuscleLevels(){
-  const curWk=Math.floor(Date.now()/604800000); // 7-day buckets, epoch-aligned
-  const byMuscle={};
+  const WEEK_MS=604800000;
+  const curWk=Math.floor((Date.now()-MON_ANCHOR)/WEEK_MS);
+  const byMuscle={}, lastSeen={};
   Object.entries(DB.logs).forEach(([id,arr])=>{
     const m=findEx(id)?.muscle||'Other';
     (arr||[]).forEach(e=>{
       if(!e.date) return;
+      const t=new Date(e.date).getTime();
+      if(!lastSeen[m]||e.date>lastSeen[m]) lastSeen[m]=e.date;
       const cnt=(e.sets||[]).filter(s=>s.weight&&s.reps).length;
       if(!cnt) return;
-      const wk=Math.floor(new Date(e.date).getTime()/604800000);
+      const wk=Math.floor((t-MON_ANCHOR)/WEEK_MS);
       byMuscle[m]=byMuscle[m]||{};
       byMuscle[m][wk]=(byMuscle[m][wk]||0)+cnt;
     });
@@ -1157,10 +1173,11 @@ function computeMuscleLevels(){
     for(; wk<=curWk; wk++){
       const sets=weeks[wk]||0;
       if(sets>0){ xp+=xpForWeek(sets); untrained=0; }
-      else { untrained++; if(untrained>2) xp=Math.max(0,xp-8); }
+      else { untrained++; if(untrained>3) xp=Math.max(0,xp-8); } // grace period: 3 weeks before decay (covers normal deload)
     }
     const level=levelFromXp(xp);
-    return { muscle:m, level, xp, xpBase:xpForLevel(level), xpNext:xpForLevel(level+1), thisWeekSets:weeks[curWk]||0, untrained };
+    const daysAgo=lastSeen[m]?Math.floor((Date.now()-new Date(lastSeen[m]).getTime())/86400000):null;
+    return { muscle:m, level, xp, xpBase:xpForLevel(level), xpNext:xpForLevel(level+1), thisWeekSets:weeks[curWk]||0, untrained, daysAgo };
   }).sort((a,b)=>b.level-a.level || b.xp-a.xp);
 }
 function drawLevels(){
@@ -1168,13 +1185,19 @@ function drawLevels(){
   const rows=computeMuscleLevels();
   if(!rows.length){ box.innerHTML='<div class="chart-empty">No volume logged yet.</div>'; return; }
   box.innerHTML=rows.map(r=>{
-    const pct=Math.min(100,Math.round((r.xp-r.xpBase)/(r.xpNext-r.xpBase)*100));
+    const pct=Math.min(100,Math.round((r.xp-r.xpBase)/(r.xpNext-r.xpBase)*100))||0;
     const col=MUSCLE_COL[r.muscle]||'var(--muted2)';
-    const warn=r.untrained>2?`<span class="lvl-warn">⚠ ${r.untrained}w untrained</span>`:'';
+    const zi=zoneIdx(r.thisWeekSets);
+    const zcol=ZONE_COLS[zi];
+    const hint=zoneHint(r.thisWeekSets);
+    const xpLeft=r.xpNext-r.xp;
+    const lastStr=r.daysAgo===0?'Today':r.daysAgo===1?'Yesterday':r.daysAgo!=null?`${r.daysAgo}d ago`:'—';
+    const warn=r.untrained>3?` <span class="lvl-warn">⚠ ${r.untrained}w gap</span>`:'';
     return `<div class="lvl-row">
-      <div class="lvl-top"><span class="lvl-dot" style="background:${col}"></span><span class="lvl-name">${esc(r.muscle)}</span><span class="lvl-num">Lv.${r.level}</span></div>
+      <div class="lvl-top"><span class="lvl-dot" style="background:${col}"></span><span class="lvl-name">${esc(r.muscle)}</span><span class="lvl-num">Lv.${r.level}<span class="lvl-xpleft">${xpLeft} XP to next</span></span></div>
       <div class="muscle-bar-bg"><div class="muscle-bar" style="width:${pct}%;background:${col}"></div></div>
-      <div class="lvl-sub">${r.thisWeekSets} set${r.thisWeekSets!==1?'s':''} this week — ${zoneLabel(r.thisWeekSets)}${warn}</div>
+      <div class="lvl-sub"><span style="color:${zcol};font-weight:600">${zoneLabel(r.thisWeekSets)}</span> · ${r.thisWeekSets} set${r.thisWeekSets!==1?'s':''} this week · ${lastStr}${warn}</div>
+      ${hint?`<div class="lvl-hint">${hint}</div>`:''}
     </div>`;
   }).join('');
 }
