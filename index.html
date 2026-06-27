@@ -1027,38 +1027,57 @@ function drawPlates(){
 }
 
 /* ─────────── PROGRESS ─────────── */
-let progEx=null, progRange=90, progTab='charts';
+let progEx=null, progRange=90, progTab='overview';
 function renderProgress(){
   const page=$('progPage');
   const hasAny=Object.values(DB.logs).some(a=>a&&a.length);
   if(!hasAny){ page.innerHTML=`<div class="empty-state">No data yet.<br>Log a session to see charts.</div>`; return; }
   page.innerHTML=`
-    <div class="seg">${[['charts','Charts'],['levels','Levels']].map(t=>`<button class="${progTab===t[0]?'on':''}" onclick="progTab='${t[0]}';renderProgress()">${t[1]}</button>`).join('')}</div>
+    <div class="seg">${[['overview','Overview'],['exercise','Exercise'],['levels','Levels']].map(t=>`<button class="${progTab===t[0]?'on':''}" onclick="progTab='${t[0]}';renderProgress()">${t[1]}</button>`).join('')}</div>
     <div id="progContent"></div>`;
   if(progTab==='levels') renderLevelsTab();
-  else renderChartsTab();
+  else if(progTab==='exercise') renderExerciseTab();
+  else renderOverviewTab();
 }
-function renderChartsTab(){
-  const exList=allEx().filter(e=>getHist(e.id).length);
-  if(!progEx||!findEx(progEx)) progEx=(exList[0]||allEx()[0])?.id;
-  let opts=''; activeProgram.days.forEach(d=>{ opts+=`<optgroup label="${esc(d.name)}">`; d.ex.forEach(e=>{ opts+=`<option value="${e.id}"${e.id===progEx?' selected':''}>${esc(e.name)}</option>`; }); opts+='</optgroup>'; });
+function renderOverviewTab(){
+  const now=Date.now(); const week7=now-7*86400000;
+  let sessW=0, volW=0, lastDate=null;
+  Object.values(DB.logs).forEach(arr=>(arr||[]).forEach(e=>{
+    const t=new Date(e.date).getTime();
+    if(!lastDate||e.date>lastDate) lastDate=e.date;
+    if(t>=week7){ sessW++; volW+=(e.sets||[]).reduce((a,s)=>a+(s.weight*s.reps||0),0); }
+  }));
+  const daysAgo=lastDate?Math.floor((now-new Date(lastDate).getTime())/86400000):null;
+  const daysStr=daysAgo===0?'Today':daysAgo===1?'Yesterday':(daysAgo!=null?`${daysAgo}d ago`:'—');
+  const volStr=volW>=1000?(volW/1000).toFixed(1)+'k':String(Math.round(volW));
   $('progContent').innerHTML=`
-    <div class="section-h">Exercise progress</div>
-    <select class="ex-select" id="progExSel" onchange="progEx=this.value;drawProgCharts()">${opts}</select>
-    <div class="seg" id="rangeSeg">
-      ${[[30,'30d'],[90,'90d'],[180,'6m'],[9999,'All']].map(r=>`<button class="${progRange===r[0]?'on':''}" onclick="progRange=${r[0]};renderProgress()">${r[1]}</button>`).join('')}
+    <div class="mini-stats">
+      <div class="ms"><div class="ms-v lime">${sessW}</div><div class="ms-l">Sessions (7d)</div></div>
+      <div class="ms"><div class="ms-v">${volStr}</div><div class="ms-l">Volume (7d) ${UNIT()}</div></div>
+      <div class="ms"><div class="ms-v">${daysStr}</div><div class="ms-l">Last session</div></div>
     </div>
-    <div class="mini-stats" id="progMini"></div>
-    <div class="card-block"><div class="cb-head"><span class="cb-title">Top set weight</span><span class="cb-sub">${UNIT()}</span></div><div class="chart-wrap"><canvas class="chart" id="chartWeight"></canvas></div></div>
-    <div class="card-block"><div class="cb-head"><span class="cb-title">Est. 1RM</span><span class="cb-sub">Epley</span></div><div class="chart-wrap"><canvas class="chart" id="chart1rm"></canvas></div></div>
-    <div class="card-block"><div class="cb-head"><span class="cb-title">Session volume</span><span class="cb-sub">${UNIT()}</span></div><div class="chart-wrap"><canvas class="chart" id="chartVol"></canvas></div></div>
     <div class="section-h">Weekly volume — all lifts</div>
     <div class="card-block"><div class="chart-wrap"><canvas class="chart" id="chartWeekly"></canvas></div></div>
     <div class="section-h">Volume by muscle <span class="cb-sub" style="margin-left:auto">last 30 days</span></div>
     <div class="card-block" id="muscleBox"></div>
     <div class="section-h">Personal records</div>
     <div class="ov-list" id="prList"></div>`;
-  drawProgCharts(); drawMuscle(); drawPRs();
+  drawWeekly(); drawMuscle(); drawPRs();
+}
+function renderExerciseTab(){
+  const exList=allEx().filter(e=>getHist(e.id).length);
+  if(!progEx||!findEx(progEx)) progEx=(exList[0]||allEx()[0])?.id;
+  let opts=''; activeProgram.days.forEach(d=>{ opts+=`<optgroup label="${esc(d.name)}">`; d.ex.forEach(e=>{ opts+=`<option value="${e.id}"${e.id===progEx?' selected':''}>${esc(e.name)}</option>`; }); opts+='</optgroup>'; });
+  $('progContent').innerHTML=`
+    <select class="ex-select" id="progExSel" onchange="progEx=this.value;drawProgCharts()">${opts}</select>
+    <div class="seg" id="rangeSeg">
+      ${[[30,'30d'],[90,'90d'],[180,'6m'],[9999,'All']].map(r=>`<button class="${progRange===r[0]?'on':''}" onclick="progRange=${r[0]};renderProgress()">${r[1]}</button>`).join('')}
+    </div>
+    <div class="mini-stats" id="progMini" style="grid-template-columns:repeat(2,1fr)"></div>
+    <div class="card-block"><div class="cb-head"><span class="cb-title">Top set weight</span><span class="cb-sub">${UNIT()}</span></div><div class="chart-wrap"><canvas class="chart" id="chartWeight"></canvas></div></div>
+    <div class="card-block"><div class="cb-head"><span class="cb-title">Est. 1RM</span><span class="cb-sub">Epley</span></div><div class="chart-wrap"><canvas class="chart" id="chart1rm"></canvas></div></div>
+    <div class="card-block"><div class="cb-head"><span class="cb-title">Session volume</span><span class="cb-sub">${UNIT()}</span></div><div class="chart-wrap"><canvas class="chart" id="chartVol"></canvas></div></div>`;
+  drawProgCharts();
 }
 function renderLevelsTab(){
   $('progContent').innerHTML=`<div class="section-h">Muscle levels<span class="cb-sub" style="margin-left:auto">weekly training volume</span></div><div class="card-block" id="levelsBox"></div>`;
@@ -1077,16 +1096,18 @@ function drawProgCharts(){
   lineChart('chartWeight', wPts, 'var(--lime)');
   lineChart('chart1rm', rmPts, 'var(--blue)');
   barChart('chartVol', volPts, 'var(--teal)');
-  // mini stats
+  // mini stats (2×2 grid)
   const all=getHist(progEx); const best=topW(progEx)||0;
   const bestRm=Math.round(Math.max(0,...all.flatMap(e=>(e.sets||[]).map(s=>e1rm(s.weight||0,s.reps||0)))));
   const sessN=all.length;
+  const lastDate=all[0]?.date;
+  const daysAgo=lastDate?Math.floor((Date.now()-new Date(lastDate).getTime())/86400000):null;
+  const lastStr=daysAgo===0?'Today':daysAgo===1?'Yesterday':(daysAgo!=null?`${daysAgo}d ago`:'—');
   $('progMini').innerHTML=`
     <div class="ms"><div class="ms-v lime">${best}</div><div class="ms-l">Best ${UNIT()}</div></div>
     <div class="ms"><div class="ms-v">${bestRm}</div><div class="ms-l">Est 1RM</div></div>
-    <div class="ms"><div class="ms-v">${sessN}</div><div class="ms-l">Sessions</div></div>`;
-  // weekly volume across all
-  drawWeekly();
+    <div class="ms"><div class="ms-v">${sessN}</div><div class="ms-l">Sessions</div></div>
+    <div class="ms"><div class="ms-v">${lastStr}</div><div class="ms-l">Last trained</div></div>`;
 }
 function drawWeekly(){
   const weeks={};
@@ -1507,7 +1528,7 @@ function toast(msg,type){ const t=$('toast'); t.textContent=msg; t.className='to
 /* ─────────── INIT ─────────── */
 $('importFile').addEventListener('change', e=>{ if(e.target.files[0]) importData(e.target.files[0]); e.target.value=''; });
 $('photoFile').addEventListener('change', e=>{ if(e.target.files[0]) handlePhoto(e.target.files[0]); e.target.value=''; });
-window.addEventListener('resize', ()=>{ if($('screen-progress').classList.contains('active')) drawProgCharts(); if($('screen-body').classList.contains('active')&&bodyTab==='weight') renderWeight(); });
+window.addEventListener('resize', ()=>{ if($('screen-progress').classList.contains('active')){ if(progTab==='exercise') drawProgCharts(); else if(progTab==='overview'){ drawWeekly(); drawMuscle(); } } if($('screen-body').classList.contains('active')&&bodyTab==='weight') renderWeight(); });
 
 renderProgSelect(); calcStats(); renderTabs(); renderDay();
 bindDaySwipe(); bindSetSwipe(); bindSheetSwipe();
