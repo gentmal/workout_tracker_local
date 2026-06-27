@@ -750,8 +750,8 @@ function buildForm(ex) {
     <div class="fgroup"><span class="flabel">Date</span><input type="date" class="finput" id="date-${ex.id}" value="${todayISO()}" style="min-width:145px"></div>
     <div class="fgroup" style="flex:1"><span class="flabel">Note</span><input type="text" class="finput" id="note-${ex.id}" placeholder="optional" style="width:100%"></div>
   </div>
-  <div class="set-mini"><button class="mini-btn" onclick="fillLast('${ex.id}')">↻ Fill last session</button></div>
-  <div class="set-table"><div class="set-head"><span>Set</span><span>Weight</span><span>Reps</span><span></span></div>${rows}</div>
+  <div class="set-mini"><button class="mini-btn" onclick="fillLast('${ex.id}')">↻ Fill last session</button><button class="mini-btn" onclick="addSetRow('${ex.id}')">+ Add Set</button></div>
+  <div class="set-table" id="settable-${ex.id}"><div class="set-head"><span>Set</span><span>Weight</span><span>Reps</span><span></span></div>${rows}</div>
   <button class="btn-log" onclick="logIt('${ex.id}',${ex.sets})">LOG SESSION</button>`;
 }
 function fillLast(id) {
@@ -765,7 +765,14 @@ function onInp(id,s){
   if(w&&r){ const chk=$(`chk-${id}-${s}`); if(!chk.classList.contains('on')){chk.classList.add('on');chk.textContent='✓';chk.classList.remove('pop');void chk.offsetWidth;chk.classList.add('pop');} $(`sr-${id}-${s}`)?.classList.add('done-row'); }
 }
 function togChk(id,s){ const chk=$(`chk-${id}-${s}`); const on=chk.classList.toggle('on'); chk.textContent=on?'✓':''; $(`sr-${id}-${s}`)?.classList.toggle('done-row',on); if(on){chk.classList.remove('pop');void chk.offsetWidth;chk.classList.add('pop');} }
+function addSetRow(id){
+  let n=1; while($(`sr-${id}-${n+1}`)) n++; n++;
+  const row=document.createElement('div'); row.className='set-row'; row.id=`sr-${id}-${n}`;
+  row.innerHTML=`<div class="set-n">${n}</div><input class="num-inp" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="${UNIT()}" id="w-${id}-${n}" oninput="onInp('${id}',${n})"><input class="num-inp" type="number" inputmode="numeric" min="0" step="1" placeholder="reps" id="r-${id}-${n}" oninput="onInp('${id}',${n})"><div class="set-chk" id="chk-${id}-${n}" onclick="togChk('${id}',${n})"></div>`;
+  $(`settable-${id}`).appendChild(row);
+}
 function logIt(id,n){
+  while($(`w-${id}-${n+1}`)) n++;
   const date=$(`date-${id}`).value, note=$(`note-${id}`).value;
   if(!date) return;
   const sets=[]; let hasW=false;
