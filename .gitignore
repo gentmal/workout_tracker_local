@@ -1,2 +1,22 @@
 CLAUDE.md
 .claude/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editor/IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Local env files
+.env
+.env.local
+
+# Screenshots/photos dropped in for debugging
+*.png
+*.jpg
+*.jpeg

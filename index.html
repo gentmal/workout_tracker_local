@@ -106,7 +106,7 @@ input, button, textarea, select { font-family: inherit; }
 .screen { display: none; }
 .screen.active { display: block; animation: fade 0.2s ease; }
 @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
-.page { padding: calc(var(--safe-top) + var(--topbar-h) + 18px) 16px 28px; max-width: 680px; margin: 0 auto; }
+.page { padding: calc(var(--safe-top) + var(--topbar-h) + 18px) 16px 28px; max-width: 680px; margin: 0 auto; min-height: calc(100vh + 1px); }
 .section-h { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); padding: 0 4px; margin: 22px 0 9px; display: flex; align-items: center; gap: 8px; }
 .section-h:first-child { margin-top: 0; }
 .section-h .sh-act { margin-left: auto; color: var(--lime); font-weight: 500; cursor: pointer; -webkit-tap-highlight-color: transparent; }
@@ -168,6 +168,8 @@ input, button, textarea, select { font-family: inherit; }
 .ex-why { padding: 10px 14px 10px 44px; font-size: 12px; font-style: italic; color: var(--muted); line-height: 1.65; border-bottom: 1px solid var(--line); }
 .ex-ramp { padding: 10px 14px 10px 44px; font-size: 11px; color: var(--muted2); line-height: 1.65; border-bottom: 1px solid var(--line); }
 .ex-ramp strong { display: block; font-family: var(--mono); font-size: 9px; color: var(--amber); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
+.ex-cues { padding: 10px 14px 10px 44px; font-size: 12px; color: var(--muted2); line-height: 1.65; border-bottom: 1px solid var(--line); }
+.ex-cues strong { display: block; font-family: var(--mono); font-size: 9px; color: var(--teal); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
 .ex-log { padding: 14px; }
 
 /* ── META ROW ── */
@@ -183,6 +185,9 @@ input, button, textarea, select { font-family: inherit; }
 .set-head span:first-child { text-align: left; }
 .set-row { display: grid; grid-template-columns: 34px 1fr 1fr 38px; gap: 6px; align-items: center; padding: 5px; border-radius: 10px; margin-bottom: 5px; background: var(--card2); border: 1px solid var(--line); transition: border-color 0.15s; }
 .set-row.done-row { border-color: rgba(99,102,241,0.2); background: rgba(99,102,241,0.04); }
+.swipe-wrap { position: relative; overflow: hidden; border-radius: 10px; margin-bottom: 5px; }
+.swipe-wrap .set-row { margin-bottom: 0; position: relative; z-index: 1; }
+.swipe-bg { position: absolute; inset: 0; background: var(--red); color: #fff; display: flex; align-items: center; justify-content: flex-end; padding-right: 16px; font-size: 13px; font-weight: 700; border-radius: 10px; }
 .set-n { font-family: var(--cond); font-size: 20px; font-weight: 800; color: var(--muted); text-align: center; line-height: 1; }
 .set-row.done-row .set-n { color: var(--lime); }
 .num-inp { font-family: var(--mono); font-size: 16px; font-weight: 500; background: var(--card3); border: 1.5px solid var(--line2); border-radius: 8px; color: var(--text); padding: 10px 6px; text-align: center; outline: none; width: 100%; -webkit-appearance: none; -moz-appearance: textfield; appearance: textfield; transition: border-color 0.15s; min-height: 48px; }
@@ -244,6 +249,13 @@ canvas.chart { display: block; width: 100%; height: auto; touch-action: none; }
 .muscle-bar-bg { flex: 1; height: 8px; background: var(--card3); border-radius: 5px; overflow: hidden; }
 .muscle-bar { height: 100%; border-radius: 5px; transition: width 0.4s; }
 .muscle-val { font-family: var(--mono); font-size: 10px; color: var(--muted); min-width: 34px; text-align: right; }
+.lvl-row { margin-bottom: 16px; }
+.lvl-top { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.lvl-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.lvl-name { font-size: 13.5px; font-weight: 600; flex: 1; }
+.lvl-num { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.lvl-sub { font-family: var(--mono); font-size: 10.5px; color: var(--muted); margin-top: 5px; }
+.lvl-warn { color: var(--amber); margin-left: 8px; }
 
 /* ── OVERVIEW ── */
 .ov-list { display: flex; flex-direction: column; gap: 7px; }
@@ -259,13 +271,16 @@ canvas.chart { display: block; width: 100%; height: auto; touch-action: none; }
 .body-quick { display: flex; gap: 8px; margin-bottom: 14px; }
 .bq-input { flex: 1; }
 .measure-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-.measure-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); padding: 12px 13px; }
-.mc-top { display: flex; align-items: baseline; gap: 6px; }
+.measure-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); padding: 12px 13px; min-width: 0; }
+.mc-top { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
 .mc-v { font-family: var(--cond); font-size: 26px; font-weight: 800; color: var(--text); line-height: 1; }
 .mc-u { font-family: var(--mono); font-size: 11px; color: var(--muted); }
 .mc-name { font-family: var(--mono); font-size: 9.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 6px; }
 .mc-trend { font-family: var(--mono); font-size: 10px; margin-top: 3px; }
-.mc-edit { font-family: var(--mono); font-size: 10px; color: var(--lime); margin-top: 7px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.mc-quick { display: flex; gap: 6px; margin-top: 9px; min-width: 0; }
+.mc-qinput { flex: 1; min-width: 0; background: var(--card3); border: 1.5px solid var(--line2); border-radius: var(--r-sm); color: var(--text); font-family: var(--mono); font-size: 13px; text-align: center; padding: 8px 4px; min-height: 36px; -webkit-appearance: none; appearance: none; }
+.mc-qsave { flex-shrink: 0; width: 36px; height: 36px; border-radius: var(--r-sm); background: var(--card3); border: 1.5px solid var(--line2); color: var(--muted2); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 15px; -webkit-tap-highlight-color: transparent; transition: all 0.15s; }
+.mc-qsave:active { background: var(--lime-dim); border-color: var(--lime); color: var(--lime); }
 .cardio-row { display: flex; align-items: center; gap: 11px; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); padding: 12px 13px; margin-bottom: 7px; }
 .cardio-ic { font-size: 20px; flex-shrink: 0; }
 .cardio-meta { flex: 1; min-width: 0; }
@@ -502,31 +517,31 @@ const DEFAULT_PROGRAM = {
     { id:'fba', name:'Workout A', type:'full', sub:'Chest · Back · Quads · Delts · Triceps · Abs',
       warmup:'<strong>Warm-up (5–7 min):</strong> 5 min incline walk or bike · Band pull-aparts ×15 · Dead bug ×8/side · Glute bridge ×12',
       ex:[
-        {id:'mcp', name:'Machine Chest Press', muscle:'Chest', sets:3, reps:'6–10', rest:120, why:'Primary horizontal press with high stability and low shoulder irritation.', ramp:['Light set × 12','Moderate set × 6–8']},
-        {id:'csr', name:'Chest-Supported Row', muscle:'Back', sets:3, reps:'6–10', rest:120, why:'Heavy horizontal pull for upper-back thickness with low lower-back fatigue.'},
-        {id:'hsq', name:'Hack Squat', muscle:'Quads', sets:3, reps:'8–12', rest:120, why:'Stable squat pattern for quad growth with reduced balance demands.', ramp:['Empty sled / very light × 12–15','~50–60% working weight × 8','~75–80% working weight × 4–5']},
-        {id:'clr', name:'Cable Lateral Raise (one arm)', muscle:'Shoulders', sets:3, reps:'12–20', rest:60, why:'Primary side delt hypertrophy with constant tension.'},
-        {id:'ctp', name:'Cable Tricep Pushdown (rope)', muscle:'Triceps', sets:2, reps:'10–15', rest:60, why:'Low-fatigue tricep isolation with easy progression.'},
-        {id:'cc', name:'Cable Crunch (or Machine)', muscle:'Core', sets:3, reps:'12–20', rest:60, why:'Direct ab work with consistent resistance.'},
+        {id:'mcp', name:'Machine Chest Press', muscle:'Chest', sets:3, reps:'6–10', rest:120, why:'Primary horizontal press with high stability and low shoulder irritation.', ramp:['Light set × 12','Moderate set × 6–8'], cues:'Grip just outside shoulder width, wrists stacked over elbows. Exhale pressing out, inhale on the way back. Keep shoulder blades pinned to the pad — don\'t let elbows flare past ~75°.'},
+        {id:'csr', name:'Chest-Supported Row', muscle:'Back', sets:3, reps:'6–10', rest:120, why:'Heavy horizontal pull for upper-back thickness with low lower-back fatigue.', cues:'Chest stays pinned to the pad the whole set. Pull elbows back and down, squeeze blades together at the top; exhale on the pull, inhale lowering. Don\'t yank with momentum — let the pad take the load, not your lower back.'},
+        {id:'hsq', name:'Hack Squat', muscle:'Quads', sets:3, reps:'8–12', rest:120, why:'Stable squat pattern for quad growth with reduced balance demands.', ramp:['Empty sled / very light × 12–15','~50–60% working weight × 8','~75–80% working weight × 4–5'], cues:'Feet shoulder-width, mid-foot under you. Inhale and brace before descending, exhale driving up. Track knees over toes and avoid letting heels lift off the platform.'},
+        {id:'clr', name:'Cable Lateral Raise (one arm)', muscle:'Shoulders', sets:3, reps:'12–20', rest:60, why:'Primary side delt hypertrophy with constant tension.', cues:'Slight forward lean, lead with the elbow not the hand. Exhale raising to shoulder height, inhale lowering. Avoid shrugging the traps or using a swinging momentum.'},
+        {id:'ctp', name:'Cable Tricep Pushdown (rope)', muscle:'Triceps', sets:2, reps:'10–15', rest:60, why:'Low-fatigue tricep isolation with easy progression.', cues:'Elbows pinned to your sides, spread the rope apart at the bottom. Exhale on the push, inhale controlling the return. Don\'t let elbows drift forward — that shifts work off the triceps.'},
+        {id:'cc', name:'Cable Crunch (or Machine)', muscle:'Core', sets:3, reps:'12–20', rest:60, why:'Direct ab work with consistent resistance.', cues:'Kneel close to the cable, hips stay still throughout. Exhale curling ribs toward hips, inhale on the stretch back. Flex the abs to move the weight — don\'t pull with your arms.'},
       ]},
     { id:'fbb', name:'Workout B', type:'full', sub:'Lats · Chest · Hamstrings · Rear Delts · Biceps · Calves', warmup:'<strong>Warm-up (5–7 min):</strong> 5 min incline walk or bike · Band straight-arm pulldown ×15 · Hip hinge drill ×10 · Face pull ×15',
       ex:[
-        {id:'lpd', name:'Lat Pulldown (neutral)', muscle:'Lats', sets:3, reps:'8–12', rest:90, why:'', ramp:['Light set × 12','Moderate set × 6–8']},
-        {id:'sip', name:'Low-Incline Smith Press', muscle:'Chest', sets:3, reps:'8–12', rest:90, why:''},
-        {id:'rdl', name:'Romanian Deadlift', muscle:'Hamstrings', sets:2, reps:'8–12', rest:120, why:'', ramp:['Empty bar / very light × 10','~50–60% working weight × 6','~75–80% working weight × 3–4']},
-        {id:'rpd', name:'Reverse Pec Deck', muscle:'Rear Delts', sets:3, reps:'12–20', rest:60, why:''},
-        {id:'dbc', name:'Dumbbell Curl', muscle:'Biceps', sets:3, reps:'10–15', rest:60, why:''},
-        {id:'scr3', name:'Standing Calf Raise', muscle:'Calves', sets:2, reps:'10–15', rest:60, why:''},
+        {id:'lpd', name:'Lat Pulldown (neutral)', muscle:'Lats', sets:3, reps:'8–12', rest:90, why:'', ramp:['Light set × 12','Moderate set × 6–8'], cues:'Neutral grip just outside shoulder width. Exhale pulling elbows down toward ribs, inhale on the return. Avoid leaning back excessively or using momentum to yank the bar down.'},
+        {id:'sip', name:'Low-Incline Smith Press', muscle:'Chest', sets:3, reps:'8–12', rest:90, why:'', cues:'Grip just outside shoulders, feet flat on the floor. Inhale lowering the bar to mid-chest, exhale pressing up. Keep a slight arch and don\'t bounce the bar off your chest.'},
+        {id:'rdl', name:'Romanian Deadlift', muscle:'Hamstrings', sets:2, reps:'8–12', rest:120, why:'', ramp:['Empty bar / very light × 10','~50–60% working weight × 6','~75–80% working weight × 3–4'], cues:'Soft knees, hinge at the hips with the bar close to your legs. Inhale and brace before lowering, exhale driving hips forward to stand. Keep the lower back neutral — stop the descent before it rounds.'},
+        {id:'rpd', name:'Reverse Pec Deck', muscle:'Rear Delts', sets:3, reps:'12–20', rest:60, why:'', cues:'Light grip, elbows slightly bent, lead with the elbows not the hands. Exhale squeezing shoulder blades together, inhale on the return. Avoid shrugging or using momentum to swing the arms back.'},
+        {id:'dbc', name:'Dumbbell Curl', muscle:'Biceps', sets:3, reps:'10–15', rest:60, why:'', cues:'Elbows pinned at your sides for the whole set. Exhale curling up, inhale lowering under control. Avoid swinging the torso or letting elbows drift forward to cheat the weight up.'},
+        {id:'scr3', name:'Standing Calf Raise', muscle:'Calves', sets:2, reps:'10–15', rest:60, why:'', cues:'Full stretch at the bottom with a brief pause. Exhale rising onto your toes, inhale lowering slowly. Avoid bouncing out of the bottom — control the lowering phase.'},
       ]},
     { id:'fbc', name:'Workout C', type:'full', sub:'Chest · Back · Legs · Delts · Arms', warmup:'<strong>Warm-up (5–7 min):</strong> 5 min incline walk or bike · Band pull-aparts ×15 · Glute bridge ×12 · Bodyweight squat ×10',
       ex:[
-        {id:'pdf', name:'Pec Deck / Machine Fly', muscle:'Chest', sets:3, reps:'10–15', rest:60, why:'', ramp:['Light set × 15']},
-        {id:'scr', name:'Seated Cable Row', muscle:'Back', sets:3, reps:'8–12', rest:90, why:''},
-        {id:'lpr', name:'Leg Press', muscle:'Quads', sets:3, reps:'10–15', rest:120, why:'', ramp:['Empty sled / very light × 12–15','~50–60% working weight × 8','~75–80% working weight × 4–5']},
-        {id:'slc', name:'Seated Leg Curl', muscle:'Hamstrings', sets:3, reps:'10–15', rest:90, why:''},
-        {id:'clr', name:'Cable Lateral Raise (one arm)', muscle:'Shoulders', sets:3, reps:'12–20', rest:60, why:''},
-        {id:'oct', name:'Overhead Cable Tricep Ext.', muscle:'Triceps', sets:2, reps:'10–15', rest:60, why:''},
-        {id:'hc', name:'Hammer Curl', muscle:'Biceps / Brachialis', sets:2, reps:'10–15', rest:60, why:''},
+        {id:'pdf', name:'Pec Deck / Machine Fly', muscle:'Chest', sets:3, reps:'10–15', rest:60, why:'', ramp:['Light set × 15'], cues:'Elbows slightly bent, chest up and back against the pad. Exhale bringing hands together, inhale opening with control. Don\'t let the weight slam at the stretch — ease into it.'},
+        {id:'scr', name:'Seated Cable Row', muscle:'Back', sets:3, reps:'8–12', rest:90, why:'', cues:'Chest up, slight lean back at the finish, knees softly bent. Exhale pulling the handle to your torso, inhale extending arms forward. Avoid rounding the back or rocking with body english to move the weight.'},
+        {id:'lpr', name:'Leg Press', muscle:'Quads', sets:3, reps:'10–15', rest:120, why:'', ramp:['Empty sled / very light × 12–15','~50–60% working weight × 8','~75–80% working weight × 4–5'], cues:'Feet shoulder-width on the platform, mid-foot placement. Inhale lowering, exhale pressing up without slamming the knees straight. Keep your lower back flat on the pad — don\'t let it round off as you go deep.'},
+        {id:'slc', name:'Seated Leg Curl', muscle:'Hamstrings', sets:3, reps:'10–15', rest:90, why:'', cues:'Toes pointed up, ankles flexed throughout. Exhale curling heels down, inhale on the release. Keep hips pressed into the pad — don\'t let them lift to cheat the rep.'},
+        {id:'clr', name:'Cable Lateral Raise (one arm)', muscle:'Shoulders', sets:3, reps:'12–20', rest:60, why:'', cues:'Slight forward lean, lead with the elbow not the hand. Exhale raising to shoulder height, inhale lowering. Avoid shrugging the traps or using a swinging momentum.'},
+        {id:'oct', name:'Overhead Cable Tricep Ext.', muscle:'Triceps', sets:2, reps:'10–15', rest:60, why:'', cues:'Elbows close to your head, upper arms stay still. Exhale extending the forearms up, inhale lowering behind the head. Avoid flaring the elbows out to the sides.'},
+        {id:'hc', name:'Hammer Curl', muscle:'Biceps / Brachialis', sets:2, reps:'10–15', rest:60, why:'', cues:'Neutral grip, elbows pinned at your sides. Exhale curling up, inhale lowering under control. Avoid swinging or using shoulder momentum to start the rep.'},
       ]},
   ]
 };
@@ -642,6 +657,24 @@ function getHist(id) { return (DB.logs[id]||[]).slice().sort((a,b)=>new Date(b.d
 function topW(id) { let b=0; getHist(id).forEach(e=>(e.sets||[]).forEach(s=>{ if(s.weight>b) b=s.weight; })); return b||null; }
 function isPRweight(id, w) { return w > (topW(id)||0); }
 function vibrate(ms) { if (DB.settings.vibrate && navigator.vibrate) navigator.vibrate(ms); }
+function trackDrag(el, {onStart, onMove, onEnd}) {
+  el.addEventListener('touchstart', e=>{
+    const ctx = onStart(e);
+    if(!ctx) return;
+    const t=e.touches[0]; const sx=t.clientX, sy=t.clientY, st=Date.now(); let locked=null;
+    function move(ev){
+      const tt=ev.touches[0]; const dx=tt.clientX-sx, dy=tt.clientY-sy;
+      if(!locked){ if(Math.abs(dx)<8&&Math.abs(dy)<8) return; locked=Math.abs(dx)>Math.abs(dy)?'x':'y'; }
+      if(onMove(ctx,dx,dy,locked,ev)) ev.preventDefault();
+    }
+    function up(ev){
+      document.removeEventListener('touchmove',move); document.removeEventListener('touchend',up); document.removeEventListener('touchcancel',up);
+      const tt=ev.changedTouches[0]; onEnd(ctx, tt.clientX-sx, tt.clientY-sy, Date.now()-st, locked);
+    }
+    document.addEventListener('touchmove',move,{passive:false});
+    document.addEventListener('touchend',up); document.addEventListener('touchcancel',up);
+  }, {passive:true});
+}
 
 /* ─────────── NAV ─────────── */
 function goScreen(id) {
@@ -730,11 +763,30 @@ function renderDay() {
       <div class="ex-body" id="body-${ex.id}">
         ${ex.why?`<div class="ex-why">${esc(ex.why)}</div>`:''}
         ${Array.isArray(ex.ramp)&&ex.ramp.length?`<div class="ex-ramp"><strong>Ramp-up</strong>${ex.ramp.map(item=>esc(item)).join(' · ')}</div>`:''}
+        ${ex.cues?`<div class="ex-cues"><strong>Form cues</strong>${esc(ex.cues)}</div>`:''}
         <div class="ex-log">${buildForm(ex)}${buildHist(ex)}${buildProg(ex)}</div>
       </div>
     </div>`;
   });
   $('dayContent').innerHTML=html;
+}
+function bindDaySwipe(){
+  const el=$('dayContent');
+  trackDrag(el, {
+    onStart: ()=> activeProgram.days.length>1 ? {} : null,
+    onMove: (ctx,dx,dy,locked)=>{ if(locked!=='x') return false; el.style.transition='none'; el.style.transform=`translateX(${dx}px)`; return true; },
+    onEnd: (ctx,dx,dy,dt,locked)=>{
+      if(locked!=='x') return;
+      el.style.transition='transform 0.2s ease';
+      if(Math.abs(dx)>60 || (Math.abs(dx)>20 && dt<250)){
+        const days=activeProgram.days, i=days.findIndex(d=>d.id===activeDayId);
+        activeDayId=days[(i+(dx<0?1:-1)+days.length)%days.length].id;
+        vibrate(10);
+      }
+      el.style.transform='translateX(0)';
+      setTimeout(()=>{ el.style.transition=''; renderTabs(); renderDay(); },200);
+    }
+  });
 }
 function buildForm(ex) {
   let rows='';
@@ -841,7 +893,7 @@ function renderSession() {
     if(complete)done++;
     let setsHtml='';
     item.sets.forEach((s,i)=>{
-      setsHtml+=`<div class="set-row done-row"><div class="set-n">${i+1}</div><div style="font-family:var(--mono);font-size:14px;text-align:center">${s.weight} ${UNIT()}</div><div style="font-family:var(--mono);font-size:14px;text-align:center">${s.reps} reps</div><div class="set-chk on" onclick="rmSessSet(${idx},${i})">✕</div></div>`;
+      setsHtml+=`<div class="swipe-wrap" data-idx="${idx}" data-i="${i}"><div class="swipe-bg">🗑 Delete</div><div class="set-row done-row"><div class="set-n">${i+1}</div><div style="font-family:var(--mono);font-size:14px;text-align:center">${s.weight} ${UNIT()}</div><div style="font-family:var(--mono);font-size:14px;text-align:center">${s.reps} reps</div><div class="set-chk on" onclick="rmSessSet(${idx},${i})">✕</div></div></div>`;
     });
     const n=item.sets.length+1;
     if(!complete){
@@ -885,8 +937,34 @@ function addSessSet(idx){
   startRest(rest, SESS.ex[idx].ref.name);
 }
 function rmSessSet(idx,i){ SESS.ex[idx].sets.splice(i,1); renderSession(); }
+function bindSetSwipe(){
+  trackDrag($('sessScroll'), {
+    onStart: e=>{ const wrap=e.target.closest('.swipe-wrap'); return wrap ? {wrap, row:wrap.querySelector('.set-row')} : null; },
+    onMove: (ctx,dx,dy,locked)=>{ if(locked!=='x') return false; ctx.row.style.transition='none'; ctx.row.style.transform=`translateX(${Math.min(0,dx)}px)`; return true; },
+    onEnd: (ctx,dx,dy,dt,locked)=>{
+      ctx.row.style.transition='transform 0.18s ease';
+      if(locked==='x' && dx<-70){
+        ctx.row.style.transform='translateX(-100%)'; vibrate(15);
+        setTimeout(()=>rmSessSet(+ctx.wrap.dataset.idx, +ctx.wrap.dataset.i), 180);
+      } else {
+        ctx.row.style.transform='translateX(0)';
+      }
+    }
+  });
+}
 function completeEx(idx){ SESS.ex[idx].done=!SESS.ex[idx].done; if(SESS.ex[idx].done){ const nxt=SESS.ex.findIndex((x,i)=>i>idx&&!x.done); SESS.curIdx=nxt<0?idx:nxt; } renderSession(); }
+function unlockAudio(){
+  if(!DB.settings.sound) return;
+  try{
+    if(!audioCtx||audioCtx.state==='closed') audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended') audioCtx.resume();
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    g.gain.value=0; o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime+0.01);
+  }catch{}
+}
 function startRest(sec, nextName){
+  unlockAudio();
   clearInterval(restTimer); restTotal=sec; restEnd=Date.now()+sec*1000;
   $('restNext').textContent=nextName?('after '+nextName):'';
   const fill=$('restProgFill'); if(fill) fill.style.width='100%';
@@ -903,7 +981,7 @@ function addRest(s){ restEnd+=s*1000; tickRest(); }
 function skipRest(){ clearInterval(restTimer); $('restBar').classList.remove('show'); }
 function beep(){
   if(!DB.settings.sound) return;
-  try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); const o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); o.frequency.value=880; o.type='sine'; g.gain.setValueAtTime(0.001,audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.3,audioCtx.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.5); o.start(); o.stop(audioCtx.currentTime+0.5); }catch{}
+  try{ if(!audioCtx) return; const o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); o.frequency.value=880; o.type='sine'; g.gain.setValueAtTime(0.001,audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.3,audioCtx.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.5); o.start(); o.stop(audioCtx.currentTime+0.5); }catch{}
 }
 function finishSession(){
   if(!SESS) return;
@@ -949,15 +1027,22 @@ function drawPlates(){
 }
 
 /* ─────────── PROGRESS ─────────── */
-let progEx=null, progRange=90;
+let progEx=null, progRange=90, progTab='charts';
 function renderProgress(){
   const page=$('progPage');
-  const exList=allEx().filter(e=>getHist(e.id).length);
   const hasAny=Object.values(DB.logs).some(a=>a&&a.length);
   if(!hasAny){ page.innerHTML=`<div class="empty-state">No data yet.<br>Log a session to see charts.</div>`; return; }
+  page.innerHTML=`
+    <div class="seg">${[['charts','Charts'],['levels','Levels']].map(t=>`<button class="${progTab===t[0]?'on':''}" onclick="progTab='${t[0]}';renderProgress()">${t[1]}</button>`).join('')}</div>
+    <div id="progContent"></div>`;
+  if(progTab==='levels') renderLevelsTab();
+  else renderChartsTab();
+}
+function renderChartsTab(){
+  const exList=allEx().filter(e=>getHist(e.id).length);
   if(!progEx||!findEx(progEx)) progEx=(exList[0]||allEx()[0])?.id;
   let opts=''; activeProgram.days.forEach(d=>{ opts+=`<optgroup label="${esc(d.name)}">`; d.ex.forEach(e=>{ opts+=`<option value="${e.id}"${e.id===progEx?' selected':''}>${esc(e.name)}</option>`; }); opts+='</optgroup>'; });
-  page.innerHTML=`
+  $('progContent').innerHTML=`
     <div class="section-h">Exercise progress</div>
     <select class="ex-select" id="progExSel" onchange="progEx=this.value;drawProgCharts()">${opts}</select>
     <div class="seg" id="rangeSeg">
@@ -974,6 +1059,10 @@ function renderProgress(){
     <div class="section-h">Personal records</div>
     <div class="ov-list" id="prList"></div>`;
   drawProgCharts(); drawMuscle(); drawPRs();
+}
+function renderLevelsTab(){
+  $('progContent').innerHTML=`<div class="section-h">Muscle levels<span class="cb-sub" style="margin-left:auto">weekly training volume</span></div><div class="card-block" id="levelsBox"></div>`;
+  drawLevels();
 }
 function rangeData(id){
   const cut=Date.now()-progRange*86400000;
@@ -1021,6 +1110,52 @@ function drawMuscle(){
 function drawPRs(){
   const rows=allEx().map(e=>({name:e.name, w:topW(e.id), cnt:(DB.logs[e.id]||[]).length})).filter(e=>e.w).sort((a,b)=>b.w-a.w);
   $('prList').innerHTML=rows.length?rows.map(e=>`<div class="ov-row"><div class="ov-name">${esc(e.name)}</div><div class="ov-right"><div class="ov-kg">${e.w}<span> ${UNIT()}</span></div><div class="ov-cnt">${e.cnt} session${e.cnt!==1?'s':''}</div></div></div>`).join(''):'<div class="chart-empty">No PRs yet.</div>';
+}
+/* Weekly hard-set volume zones (Schoenfeld dose-response meta-analyses; RP MEV/MAV/MRV landmarks) */
+function xpForWeek(sets){ if(sets>=20)return 2; if(sets>=11)return 6; if(sets>=4)return 10; if(sets>=1)return 2; return 0; }
+function zoneLabel(sets){ if(sets>=20)return 'Overreaching'; if(sets>=11)return 'High volume'; if(sets>=4)return 'Growth zone'; if(sets>=1)return 'Below target'; return 'Untrained'; }
+function xpForLevel(l){ return Math.round(50*Math.pow(l-1,1.5)); }
+function levelFromXp(xp){ let l=1; while(xpForLevel(l+1)<=xp) l++; return l; }
+function computeMuscleLevels(){
+  const curWk=Math.floor(Date.now()/604800000); // 7-day buckets, epoch-aligned
+  const byMuscle={};
+  Object.entries(DB.logs).forEach(([id,arr])=>{
+    const m=findEx(id)?.muscle||'Other';
+    (arr||[]).forEach(e=>{
+      if(!e.date) return;
+      const cnt=(e.sets||[]).filter(s=>s.weight&&s.reps).length;
+      if(!cnt) return;
+      const wk=Math.floor(new Date(e.date).getTime()/604800000);
+      byMuscle[m]=byMuscle[m]||{};
+      byMuscle[m][wk]=(byMuscle[m][wk]||0)+cnt;
+    });
+  });
+  return Object.entries(byMuscle).map(([m,weeks])=>{
+    let wk=Math.min(...Object.keys(weeks).map(Number));
+    let xp=0, untrained=0;
+    for(; wk<=curWk; wk++){
+      const sets=weeks[wk]||0;
+      if(sets>0){ xp+=xpForWeek(sets); untrained=0; }
+      else { untrained++; if(untrained>2) xp=Math.max(0,xp-8); }
+    }
+    const level=levelFromXp(xp);
+    return { muscle:m, level, xp, xpBase:xpForLevel(level), xpNext:xpForLevel(level+1), thisWeekSets:weeks[curWk]||0, untrained };
+  }).sort((a,b)=>b.level-a.level || b.xp-a.xp);
+}
+function drawLevels(){
+  const box=$('levelsBox');
+  const rows=computeMuscleLevels();
+  if(!rows.length){ box.innerHTML='<div class="chart-empty">No volume logged yet.</div>'; return; }
+  box.innerHTML=rows.map(r=>{
+    const pct=Math.min(100,Math.round((r.xp-r.xpBase)/(r.xpNext-r.xpBase)*100));
+    const col=MUSCLE_COL[r.muscle]||'var(--muted2)';
+    const warn=r.untrained>2?`<span class="lvl-warn">⚠ ${r.untrained}w untrained</span>`:'';
+    return `<div class="lvl-row">
+      <div class="lvl-top"><span class="lvl-dot" style="background:${col}"></span><span class="lvl-name">${esc(r.muscle)}</span><span class="lvl-num">Lv.${r.level}</span></div>
+      <div class="muscle-bar-bg"><div class="muscle-bar" style="width:${pct}%;background:${col}"></div></div>
+      <div class="lvl-sub">${r.thisWeekSets} set${r.thisWeekSets!==1?'s':''} this week — ${zoneLabel(r.thisWeekSets)}${warn}</div>
+    </div>`;
+  }).join('');
 }
 
 /* ─────────── CHARTS (canvas) ─────────── */
@@ -1113,29 +1248,49 @@ function renderWeight(){
 }
 function addWeight(){ const v=parseDecimal($('bwIn').value); const d=$('bwDate').value||todayISO(); if(!v){toast('Enter a weight','bad');return;} DB.body.weight=(DB.body.weight||[]).filter(e=>e.date!==d); DB.body.weight.push({date:d,value:v}); saveDB(); toast('Logged ✓','lime'); renderWeight(); }
 function delWeight(d){ DB.body.weight=(DB.body.weight||[]).filter(e=>e.date!==d); saveDB(); renderWeight(); }
+function slugPart(part){ return part.replace(/\s+/g,'_'); }
 function renderMeasure(){
   let html='<div class="measure-grid">';
   MEASURE_PARTS.forEach(part=>{
     const arr=(DB.body.measure[part]||[]).slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
     const last=arr[arr.length-1], prev=arr[arr.length-2];
     const tr=last&&prev?(last.value-prev.value):null;
+    const sl=slugPart(part);
     html+=`<div class="measure-card">
-      <div class="mc-top"><span class="mc-v">${last?last.value:'—'}</span><span class="mc-u">cm</span></div>
-      <div class="mc-name">${part}</div>
+      <div class="mc-top" onclick="openMeasureHist('${part}')" style="cursor:pointer"><span class="mc-v">${last?last.value:'—'}</span><span class="mc-u">cm</span></div>
+      <div class="mc-name" onclick="openMeasureHist('${part}')" style="cursor:pointer">${part}</div>
       ${tr!==null?`<div class="mc-trend" style="color:${tr>0?'var(--lime)':tr<0?'var(--red)':'var(--muted)'}">${tr>0?'↑ +':tr<0?'↓ ':'→ '}${tr!==0?Math.abs(tr).toFixed(1):''}</div>`:'<div class="mc-trend" style="color:var(--muted)">no data</div>'}
-      <div class="mc-edit" onclick="logMeasure('${part}')">+ log</div>
+      <div class="mc-quick">
+        <input class="mc-qinput" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="mq-${sl}" placeholder="${last?last.value:'cm'}" onkeydown="if(event.key==='Enter')quickMeasure('${part}')">
+        <div class="mc-qsave" onclick="quickMeasure('${part}')">✓</div>
+      </div>
     </div>`;
   });
   html+='</div>';
   $('bodyContent').innerHTML=html;
 }
-function logMeasure(part){
-  openSheet('Log '+part, `
-    <div class="field"><label>${part} (cm)</label><input type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="mVal" autofocus></div>
-    <div class="field"><label>Date</label><input type="date" id="mDate" value="${todayISO()}"></div>
-    <button class="btn-log" onclick="saveMeasure('${part}')">SAVE</button>`);
+function quickMeasure(part){
+  const input=$(`mq-${slugPart(part)}`);
+  const v=parseDecimal(input.value);
+  if(!v){toast('Enter a value','bad');return;}
+  const d=todayISO();
+  if(!DB.body.measure[part])DB.body.measure[part]=[];
+  DB.body.measure[part]=DB.body.measure[part].filter(e=>e.date!==d);
+  DB.body.measure[part].push({date:d,value:v});
+  saveDB(); toast('Logged ✓','lime'); vibrate(25);
+  renderMeasure();
 }
-function saveMeasure(part){ const v=parseDecimal($('mVal').value), d=$('mDate').value||todayISO(); if(!v){toast('Enter a value','bad');return;} if(!DB.body.measure[part])DB.body.measure[part]=[]; DB.body.measure[part]=DB.body.measure[part].filter(e=>e.date!==d); DB.body.measure[part].push({date:d,value:v}); saveDB(); closeSheet(); toast('Saved ✓','lime'); renderMeasure(); }
+function openMeasureHist(part){
+  const arr=(DB.body.measure[part]||[]).slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const rows=arr.length?arr.map(e=>`<div class="hist-row"><div class="hist-d">${fmtDate(e.date)}</div><div class="hist-s">${e.value} cm</div><button class="hist-del" onclick="delMeasure('${part}','${e.date}');openMeasureHist('${part}')">✕</button></div>`).join(''):`<div class="hist-empty">No entries yet.</div>`;
+  openSheet(part, `
+    <div class="field"><label>${part} (cm)</label><input type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="mVal" placeholder="${arr[0]?arr[0].value:''}" autofocus></div>
+    <div class="field"><label>Date</label><input type="date" id="mDate" value="${todayISO()}"></div>
+    <button class="btn-log" onclick="saveMeasure('${part}')">SAVE</button>
+    <div class="hist-wrap" style="margin-top:14px"><div class="hist-head">History</div>${rows}</div>`);
+}
+function saveMeasure(part){ const v=parseDecimal($('mVal').value), d=$('mDate').value||todayISO(); if(!v){toast('Enter a value','bad');return;} if(!DB.body.measure[part])DB.body.measure[part]=[]; DB.body.measure[part]=DB.body.measure[part].filter(e=>e.date!==d); DB.body.measure[part].push({date:d,value:v}); saveDB(); toast('Saved ✓','lime'); renderMeasure(); openMeasureHist(part); }
+function delMeasure(part,d){ DB.body.measure[part]=(DB.body.measure[part]||[]).filter(e=>e.date!==d); saveDB(); renderMeasure(); }
 function renderCardio(){
   const arr=(DB.body.cardio||[]).slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
   let html=`<button class="btn-ghost" style="margin-bottom:14px" onclick="logCardio()">+ Log cardio</button>`;
@@ -1236,7 +1391,7 @@ function moveEx(pid,did,i,dir){ const d=DB.programs.find(x=>x.id===pid).days.fin
 function delEx(pid,did,exid){ if(!confirm('Remove this exercise? Its logged history is kept but hidden.'))return; const d=DB.programs.find(x=>x.id===pid).days.find(x=>x.id===did); d.ex=d.ex.filter(e=>e.id!==exid); saveDB(); openDayEditor(pid,did); if(pid===activeProgram.id)renderDay(); }
 function editEx(pid,did,exid){
   const d=DB.programs.find(x=>x.id===pid).days.find(x=>x.id===did);
-  const e=exid?d.ex.find(x=>x.id===exid):{name:'',muscle:'Chest',sets:3,reps:'10–12',rest:90,why:''};
+  const e=exid?d.ex.find(x=>x.id===exid):{name:'',muscle:'Chest',sets:3,reps:'10–12',rest:90,why:'',cues:''};
   openSheet(exid?'Edit exercise':'New exercise', `
     <div class="field"><label>Exercise name</label><input id="exName" value="${esc(e.name)}"></div>
     <div class="field"><label>Muscle group</label><select id="exMuscle">${MUSCLES.map(m=>`<option${m===e.muscle?' selected':''}>${m}</option>`).join('')}</select></div>
@@ -1246,12 +1401,13 @@ function editEx(pid,did,exid){
       <div class="field"><label>Rest (s)</label><input type="number" inputmode="numeric" id="exRest" value="${e.rest}"></div>
     </div>
     <div class="field"><label>Why / cue (optional)</label><textarea id="exWhy">${esc(e.why||'')}</textarea></div>
+    <div class="field"><label>Form cues (optional)</label><textarea id="exCues" placeholder="Grip, breathing, common mistakes...">${esc(e.cues||'')}</textarea></div>
     <button class="btn-log" onclick="saveEx('${pid}','${did}',${exid?`'${exid}'`:'null'})">SAVE</button>`);
 }
 function saveEx(pid,did,exid){
   const d=DB.programs.find(x=>x.id===pid).days.find(x=>x.id===did);
   const name=$('exName').value.trim(); if(!name){toast('Enter a name','bad');return;}
-  const data={name,muscle:$('exMuscle').value,sets:parseInt($('exSets').value)||3,reps:$('exReps').value.trim()||'10–12',rest:parseInt($('exRest').value)||60,why:$('exWhy').value.trim()};
+  const data={name,muscle:$('exMuscle').value,sets:parseInt($('exSets').value)||3,reps:$('exReps').value.trim()||'10–12',rest:parseInt($('exRest').value)||60,why:$('exWhy').value.trim(),cues:$('exCues').value.trim()};
   if(exid){ const e=d.ex.find(x=>x.id===exid); Object.assign(e,data); }
   else d.ex.push({id:uid(),...data});
   saveDB(); openDayEditor(pid,did); if(pid===activeProgram.id){renderTabs();renderDay();}
@@ -1327,6 +1483,23 @@ function clearAll(){
 /* ─────────── SHEET ─────────── */
 function openSheet(title, bodyHTML){ $('sheetTitle').textContent=title; $('sheetBody').innerHTML=bodyHTML; $('sheetBack').classList.add('show'); $('sheet').classList.add('show'); }
 function closeSheet(){ $('sheetBack').classList.remove('show'); $('sheet').classList.remove('show'); }
+function bindSheetSwipe(){
+  const sheet=$('sheet');
+  trackDrag(sheet, {
+    onStart: e=> e.target.closest('.sheet-grip,.sheet-head') && !e.target.closest('.sheet-close') ? {} : null,
+    onMove: (ctx,dx,dy,locked)=>{ if(locked!=='y'||dy<0) return false; sheet.style.transition='none'; sheet.style.transform=`translateY(${dy}px)`; return true; },
+    onEnd: (ctx,dx,dy,dt,locked)=>{
+      sheet.style.transition='transform 0.28s cubic-bezier(.32,.72,.34,1)';
+      if(locked==='y' && (dy>110 || (dy>40 && dt<250))){
+        sheet.style.transform='translateY(100%)'; vibrate(10);
+        setTimeout(()=>{ closeSheet(); sheet.style.transition=''; sheet.style.transform=''; },260);
+      } else {
+        sheet.style.transform='translateY(0)';
+        setTimeout(()=>{ sheet.style.transition=''; sheet.style.transform=''; },280);
+      }
+    }
+  });
+}
 
 /* ─────────── TOAST ─────────── */
 function toast(msg,type){ const t=$('toast'); t.textContent=msg; t.className='toast '+(type||'')+' show'; clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2200); }
@@ -1337,6 +1510,7 @@ $('photoFile').addEventListener('change', e=>{ if(e.target.files[0]) handlePhoto
 window.addEventListener('resize', ()=>{ if($('screen-progress').classList.contains('active')) drawProgCharts(); if($('screen-body').classList.contains('active')&&bodyTab==='weight') renderWeight(); });
 
 renderProgSelect(); calcStats(); renderTabs(); renderDay();
+bindDaySwipe(); bindSetSwipe(); bindSheetSwipe();
 if(DB._migrated){ toast(`Imported ${DB._migrated} past entries`,'lime'); delete DB._migrated; saveDB(); }
 
 if('serviceWorker' in navigator){ window.addEventListener('load', ()=>navigator.serviceWorker.register('./sw.js').catch(()=>{})); }
