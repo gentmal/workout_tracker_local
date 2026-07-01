@@ -359,6 +359,9 @@ canvas.chart { display: block; width: 100%; height: auto; touch-action: none; }
 .sess-ex-name { flex: 1; font-size: 15px; font-weight: 700; }
 .sess-ex-target { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 2px; }
 .sess-ex-last { font-family: var(--mono); font-size: 10px; color: var(--blue); }
+.sess-cues { padding: 0 14px 10px; font-size: 11px; color: var(--muted2); line-height: 1.55; }
+.sess-cues > div + div { margin-top: 4px; }
+.sess-cues strong { color: var(--teal); font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; margin-right: 4px; }
 .sess-sets { padding: 0 14px 14px; }
 .sess-add { width: 100%; padding: 10px; background: var(--card2); border: 1px dashed var(--line2); border-radius: var(--r-sm); color: var(--muted2); font-size: 12px; font-weight: 600; cursor: pointer; -webkit-tap-highlight-color: transparent; margin-top: 6px; }
 .rest-bar { position: fixed; left: 0; right: 0; bottom: 0; max-width: 680px; margin: 0 auto; background: var(--bg2); border-top: 1px solid var(--line2); padding: 12px 16px calc(12px + var(--safe-bot)); z-index: 401; display: flex; align-items: center; gap: 12px; transform: translateY(120%); transition: transform 0.3s; }
@@ -916,6 +919,11 @@ function renderSession() {
         <button class="pe-mini" onclick="openPlate(${idx})" title="Plate calculator">🧮</button>
         ${item.sets.length?`<button class="rest-btn" style="padding:8px 12px" onclick="completeEx(${idx})">${complete?'✓ Done':'Finish'}</button>`:''}
       </div>
+      ${!complete&&(e.why||e.cues||(Array.isArray(e.ramp)&&e.ramp.length))?`<div class="sess-cues">
+        ${e.why?`<div>${esc(e.why)}</div>`:''}
+        ${Array.isArray(e.ramp)&&e.ramp.length?`<div><strong>Ramp-up</strong>${e.ramp.map(item=>esc(item)).join(' · ')}</div>`:''}
+        ${e.cues?`<div><strong>Form</strong>${esc(e.cues)}</div>`:''}
+      </div>`:''}
       <div class="sess-sets">${setsHtml}</div>
     </div>`;
   });
